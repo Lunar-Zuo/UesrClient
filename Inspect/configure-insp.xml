@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configure>
+  <!--进程id-->
+  <programId>11</programId>
+  
+  <!--后台数据提交地址-->
+  <commitUrl>http://192.168.2.100:8099/gds4/api</commitUrl>
+  
+  <!--Web Socket服务器地址-->
+  <wsUrl>ws://192.168.2.100:9600/</wsUrl>
+
+  <!--检测相机配置-->
+  <cameras>
+    <camera id="1" />
+    <camera id="2" />
+  </cameras>
+
+  <!--心跳包发送周期, ms-->
+  <hbDuration>3000</hbDuration>
+
+  <!--算法配置-->
+  <algorithm>
+    <!--请求地址-->
+    <url>http://192.168.2.105:9800/</url>
+    <!--Recipe参数目录-->
+    <recipeFilePath>C:/BJCW/AlgoConfig/</recipeFilePath>
+    <!--recipe参数文件-->
+    <recipeFileName>recipe.ini</recipeFileName>
+    <!--启用算法开关-->
+    <enable>false</enable>
+    <servs>
+      <item id="1" name="算法1" port="12000" />
+      <item id="2" name="算法2" port="12010" />
+	    <item id="3" name="算法3" port="12020" />
+    </servs>
+  </algorithm>
+
+  <image>
+    <!--本地存储-->
+    <localPath>E:/LocalImage/</localPath>
+    <!--历史数据存储根目录-->
+    <historyPath>E:/Images/</historyPath>
+    <!--历史数据存储目录是否使用配置文件-->
+    <historyUserLocal>false</historyUserLocal>
+  </image>
+  
+
+</configure>
