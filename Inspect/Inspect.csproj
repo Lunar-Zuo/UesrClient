@@ -57,8 +57,8 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CwCommon, Version=1.1.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CwCommon.1.1.5\lib\net46\CwCommon.dll</HintPath>
+    <Reference Include="CwCommon, Version=1.1.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CwCommon.1.1.2\lib\net46\CwCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="DALSA.SaperaLT.SapClassBasic, Version=8.60.0.2120, Culture=neutral, PublicKeyToken=4d8604101dcb6b58, processorArchitecture=AMD64">

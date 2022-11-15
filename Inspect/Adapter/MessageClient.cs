@@ -126,7 +126,7 @@ namespace Inspect.Adapter
             SendMessageToServerAsync(WsCmdName.WsCmdInspectStartRes, JsonConvert.SerializeObject(body));
         }
         /// <summary>
-        /// 2.13配方切换应答
+        /// 2.15配置切换应答
         /// </summary>
         /// <param name="errCode"></param>
         public void SendUpdateCompleteToServer(int errCode)
@@ -136,7 +136,7 @@ namespace Inspect.Adapter
             SendMessageToServerAsync(WsCmdName.WsCmdUpdateParamsRes, JsonConvert.SerializeObject(body));
         }
         /// <summary>
-        /// 2.15配置更新应答
+        /// 2.13配方更新应答
         /// </summary>
         /// <param name="errCode"></param>
         public void SendRecipeCompleteToServer(int errCode)
@@ -185,7 +185,7 @@ namespace Inspect.Adapter
             }
         }
         /// <summary>
-        /// 
+        /// 检测开始应答
         /// </summary>
         /// <param name="data"></param>
 

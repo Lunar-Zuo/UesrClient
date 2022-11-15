@@ -15,6 +15,17 @@ namespace Inspect.Adapter
     {
         public static CommitAdapter Instance = new CommitAdapter();
 
+        /// <summary>
+        /// 向后台提交检测结果
+        /// </summary>
+        /// <param name="sn"></param>
+        /// <param name="panelId"></param>
+        /// <param name="sliceId"></param>
+        /// <param name="cameraId"></param>
+        /// <param name="imageId"></param>
+        /// <param name="fileName"></param>
+        /// <param name="data"></param>
+        /// <param name="result"></param>
         public async void CommitInspectResult(string sn, string panelId, int sliceId, int cameraId, int imageId, string fileName, object data, int result)
         {
             string url = BaseUrl + "/inspect/defect_data";

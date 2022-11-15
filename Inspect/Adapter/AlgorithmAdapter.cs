@@ -78,10 +78,8 @@ namespace Inspect.Adapter
                 string res = await HttpHelper.PostJsonAsync(url, JsonConvert.SerializeObject(body));
                 
                 LoggerHelper.Debug("算法返回res：" + res);
-                //行列数据转换处理
-                string res1 = RanksConvert(res, recipeId);
 
-                return JsonConvert.DeserializeObject<ResponseEntity>(res1);
+                return JsonConvert.DeserializeObject<ResponseEntity>(res);
 
             }
             catch (Exception ex)
@@ -93,14 +91,15 @@ namespace Inspect.Adapter
                 if (!string.IsNullOrEmpty(port)) SetPoint(port);
             }
         }
+
         /// <summary>
-        /// 行列数据转换（2022.09.17增加测试完成）
+        /// 行列数据转换（2022.09.17测试完成）
         /// </summary>
         /// <param name="res">算法结果</param>
         /// <param name="RecipeParam">后台数据，需要行列与端子朝向</param>
         /// <returns></returns>
-        public string RanksConvert(string res,int recipeId)
-        {   
+        public string RanksConvert(string res, int recipeId)
+        {
             try
             {
                 Dictionary<int, DefectDataEntity> DefectData = new Dictionary<int, DefectDataEntity>();
@@ -140,8 +139,10 @@ namespace Inspect.Adapter
                                 detefectData.row = rowTotal + 1 - detefectData.row;
                                 detefectData.column = columnTotal + 1 - detefectData.column;
                             }
-                            else
-                            { }
+                            else//段子朝上料端
+                            {
+
+                            }
                         }
                         DefectData.Add(count, detefectData);
                         //LoggerHelper.Debug("处理第五步：" + JsonConvert.SerializeObject(DefectData.Values));
@@ -168,7 +169,7 @@ namespace Inspect.Adapter
             }
             catch (Exception ex)
             {
-                LoggerHelper.Warn("数据处理异常," + ex.Message);
+                LoggerHelper.Debug("数据处理异常," + ex.Message);
                 return res;
             }
         }

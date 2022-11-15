@@ -152,7 +152,6 @@ namespace Inspect
             try
             {
                 int count = 0;
-                //Console.WriteLine(DateTime.Now.ToString());
                 IPEndPoint[] endPoints = IPGlobalProperties.GetIPGlobalProperties().GetActiveTcpListeners();
                 foreach (AlgoServView view in ValidAlgoServList)
                 {

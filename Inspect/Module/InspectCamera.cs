@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Inspect.Module
 {
@@ -118,6 +119,7 @@ namespace Inspect.Module
             LoadCameraRecipeParams(recipe);
             LoadRecipeAlgorithmParams(recipe);
             LoadImagePreProcessParams(recipe);
+            AlgorithmRecipeFileName = MainLogic.Config.Algorithm.RecipeFilePath + MainLogic.Config.Algorithm.RecipeFileName;//算法ini文件路径
         }
 
         private void LoadImagePreProcessParams(int recipe)
@@ -142,10 +144,10 @@ namespace Inspect.Module
         {
             var res = CommitAdapter.Instance.GetTradAlgoRecipeParams(recipe);
             string pathname = MainLogic.Config.Algorithm.RecipeFilePath + MainLogic.Config.Algorithm.RecipeFileName;
+
             List<TradAlgoInspParamEntity> data = JsonConvert.DeserializeObject<List<TradAlgoInspParamEntity>>(res.ToString());
             TradAlgoInspFileHelper.WriteTradAlgoInspFile(pathname, data);
 
-            
             //2022.09.17增加将recipe基础配置生成ini文件
             RecipeParamEntity re = CommitAdapter.Instance.GetRecipeParam(recipe);
             TradAlgoInspFileHelper.WriteTradAlgoInspFile(pathname, re);
@@ -267,15 +269,16 @@ namespace Inspect.Module
 
                     //2.OpenCV载入数据
                     Mat org = CreateImage(buffer, width, height, MatType.CV_8UC1);
+                    LoggerHelper.Info(string.Format("OpenCV载入数据完成，开始存原图，传给算法检测"));
 
                     //3.检测
                     var tInspect = AlgorithmProcess(org, info);
 
                     //4.历史图存储
-                    var tSave = HistoryImageSave(org, info);
+                    //var tSave = HistoryImageSave(org, info);
 
-                    //5.实时缩略图处理,2022.09.02取消实时缩略图处理
-                    //RealThumb(org, info);
+                    //5.实时缩略图处理
+                    RealThumb(org, info);
 
                     //6.等待异步线程处理完成
                     var inspResult = await tInspect;
@@ -290,8 +293,8 @@ namespace Inspect.Module
                     else
                     {
                         DefectInspectResEntity res = (DefectInspectResEntity)inspResult;
+                        
                         int result = res.Count > 0 ? Constant.JudgeNG : Constant.JudgeOK;
-
                         //7.向数据后台提交数据
                         CommitAdapter.Instance.CommitInspectResult(info.SerialNumber,
                             info.PanelId, cameraParam.SliceId, CameraId, info.ImageId, info.HistoryFileName, res.Data, result);
@@ -299,8 +302,31 @@ namespace Inspect.Module
                         //8.结果发送给Server
                         MessageClient.Instance.SendDefectDataToSever(info.SerialNumber,
                             info.PanelId, cameraParam.SliceId, CameraId, info.ImageId, res.Data, result);
+
+                        //count<0 算法异常
+                        if (res.Count < 0)
+                        {
+                            ConfigEntity Config= LoadConfig();
+                            HearbeatAdapter.Instance.AlgorithmStatusChange(Config.Cameras[0].CameraId.ToString(), 0);
+
+                            switch (res.Count)
+                            {
+                                case -1://算法接口异常
+                                    LoggerHelper.Warn(string.Format("调用算法接口异常,算法返回值：{0}", res.Count));
+                                    break;
+                                case -2://深度学习通讯异常
+                                    LoggerHelper.Warn(string.Format("深度学习通讯异常,算法返回值：{0}", res.Count));
+                                    break;
+                                case -3://存图异常，算法未检测
+                                    LoggerHelper.Warn(string.Format("存图异常,算法未检测,算法返回值：{0}", res.Count));
+                                    break;
+                                default:
+                                    LoggerHelper.Warn(string.Format("算法检测异常,算法返回值：{0}", res.Count));
+                                    break;
+                            }
+                        }
                     }
-                    await tSave;
+                    //await tSave;
                     org.Dispose();
                 }
                 catch (Exception ex)
@@ -340,18 +366,32 @@ namespace Inspect.Module
             {
                 try
                 {
+                    #region 存图到NAS,缩略图
+                    Mat dst = new Mat();
+                    Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / preProcessParams.HistoryImageScaleX), Height = (int)(src.Height / preProcessParams.HistoryImageScaleY) });
+                    int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
+                    string pathname = info.HistoryFilePath + info.HistoryFileName;
+                    Cv2.ImWrite(pathname, dst, param);
+                    #endregion
 
-                    //recipe路径
-                    string srtrPath = MainLogic.Config.RecipeFilePath + MainLogic.Config.RecipeFileName;
+                    #region 存图到本地,原图
+                    //Mat dst = new Mat();
+                    ////1.存储到本地磁盘
+                    //string pathname = info.LocalFilePath + info.LocalFileName;
+                    ////Cv2.ImWrite(pathname, src);
+                    //Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / 1), Height = (int)(src.Height / 1) });
+                    //int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
+                    //dst.SaveImage(pathname, param);
+                    #endregion
 
-                    //1.存储到本地磁盘
-                    string pathname = info.LocalFilePath + info.LocalFileName;
-                    Cv2.ImWrite(pathname, src);
+                    string arr = pathname.Replace("//", "/");
+                    string arrpathname = arr.Replace("/", "\\");
+                    Thread.Sleep(100);
+                    LoggerHelper.Debug($"原图存图完成，路径：{arrpathname}，检测程序调用算法开始!");
 
                     //2.调用算法
                     //return AlgorithmAdapter.Instance.TradInspectRequest(pathname, info.HistoryFilePath, "C:/BJCW/AlgoConfig/recipe.ini", info.PanelId, cameraParam.SliceId, CameraId, info.ImageId);
-
-                    ResponseEntity res = await AlgorithmAdapter.Instance.InspectRequest(pathname, 
+                    ResponseEntity res = await AlgorithmAdapter.Instance.InspectRequest(arrpathname, 
                         info.HistoryFilePath, 
                         AlgorithmRecipeFileName, 
                         info.PanelId,
@@ -359,6 +399,7 @@ namespace Inspect.Module
                         info.Recipe, 
                         CameraId, 
                         info.ImageId);
+
                     if (res.Code != 0)
                     {
                         //返回异常
@@ -438,6 +479,25 @@ namespace Inspect.Module
                         info.PanelId, cameraParam.SliceId, CameraId, info.ImageId, ex.Message));
                 }
             });
+        }
+        /// <summary>
+        /// 加载配置文件参数
+        /// </summary>
+        /// <returns></returns>
+        protected ConfigEntity LoadConfig()
+        {
+            try
+            {
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(ConfigEntity));
+                using (var fs = File.OpenRead(Constant.ConfigFileName))
+                {
+                    return (ConfigEntity)xmlSerializer.Deserialize(fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format("加载配置文件异常,{0}", ex.Message));
+            }
         }
 
         private int cameraStatus = Constant.CameraStatusDisconnected;

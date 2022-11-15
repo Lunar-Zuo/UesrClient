@@ -131,7 +131,7 @@ namespace Inspect
             MessageClient.Instance.SendInspectCompleteToServer(sn, panelId, errCode);
             //删除本地原图
             DeleteFile(DeviceParams.OriginImageStoragePath,DeviceParams.OriginImageStorageDays);
-            CleanFile("D:/DefectData", DeviceParams.DataStorageDays);
+            //CleanFile("D:/DefectData", 0/*DeviceParams.DataStorageDays*/);
         }
 
         protected void UnInitInspectCameras()
@@ -305,7 +305,7 @@ namespace Inspect
         }
 
         /// <summary>
-        /// 检测开始，主程序通知PLC允许进入
+        /// 检测开始应答，回应主程序通知PLC允许进入
         /// </summary>
         /// <param name="sn"></param>
         /// <param name="panelId"></param>
@@ -324,6 +324,7 @@ namespace Inspect
                     if (!Directory.Exists(pathname))
                         Directory.CreateDirectory(pathname);
 
+                //检测端显示信息
                 SetInspectInfo(sn, panelId, recipe, path);
 
                 foreach (var item in CameraList.Values)
