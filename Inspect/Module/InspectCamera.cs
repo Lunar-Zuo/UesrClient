@@ -55,7 +55,7 @@ namespace Inspect.Module
         private string _RelativePath;
 
         /// <summary>
-        /// 后台加载参数
+        /// 后台加载参数，开启相机线程
         /// </summary>
         /// <param name="recipe"></param>
         public void Create(int recipe)
@@ -93,7 +93,7 @@ namespace Inspect.Module
             }
         }
         /// <summary>
-        /// 后台访问recipe
+        /// 后台拿数据，开启相机线程
         /// </summary>
         /// <param name="recipe"></param>
         public void Reload(int recipe)
@@ -233,7 +233,7 @@ namespace Inspect.Module
                     RelativePath = _RelativePath,
                     ImageId = Interlocked.Increment(ref _ImageId),
                     HistoryFilePath = HistoryPathBase + "/" + _RelativePath + "/",
-                    LocalFilePath = LocalPathBase + "/" + _RelativePath + "/",
+                    //LocalFilePath = LocalPathBase + "/" + _RelativePath + "/",
                     ValidImageCount = cameraRecipeParam.ValidImageCount
                 };
                 ProcessCapturedData(buffer, width, height, info);
@@ -262,8 +262,8 @@ namespace Inspect.Module
                     string filename = CreateFileName(info.PanelId, cameraParam.SliceId, info.ImageId);
                     info.HistoryFileName = HistoryPathBase + "/" + info.RelativePath + "/";
                     info.HistoryFileName = filename + ".jpg";
-                    info.LocalFileName = LocalPathBase + "/" + info.RelativePath + "/";
-                    info.LocalFileName = filename + ".jpg";
+                    //info.LocalFileName = LocalPathBase + "/" + info.RelativePath + "/";
+                    //info.LocalFileName = filename + ".jpg";
 
                     LoggerHelper.Info("收到照片 " + filename);
 
@@ -307,7 +307,7 @@ namespace Inspect.Module
                         if (res.Count < 0)
                         {
                             ConfigEntity Config= LoadConfig();
-                            HearbeatAdapter.Instance.AlgorithmStatusChange(Config.Cameras[0].CameraId.ToString(), 0);
+                            HearbeatAdapter.Instance.AlgorithmStatusChange(Config.Cameras[0].CameraId_local.ToString(), 0);
 
                             switch (res.Count)
                             {
@@ -387,7 +387,7 @@ namespace Inspect.Module
                     string arr = pathname.Replace("//", "/");
                     string arrpathname = arr.Replace("/", "\\");
                     Thread.Sleep(100);
-                    LoggerHelper.Debug($"原图存图完成，路径：{arrpathname}，检测程序调用算法开始!");
+                    //LoggerHelper.Debug($"原图存图完成，路径：{arrpathname}，检测程序调用算法开始!");
 
                     //2.调用算法
                     //return AlgorithmAdapter.Instance.TradInspectRequest(pathname, info.HistoryFilePath, "C:/BJCW/AlgoConfig/recipe.ini", info.PanelId, cameraParam.SliceId, CameraId, info.ImageId);
@@ -556,7 +556,7 @@ namespace Inspect.Module
             lock (_PanelProcessLock)
             {
                 PanelProcess.Remove(key);
-                LoggerHelper.Info("PanelProcessRemove(key)： "+ key);
+                LoggerHelper.Info("检测超时，删除数据，PanelProcessRemove(key)： "+ key);
             }
         }
     }

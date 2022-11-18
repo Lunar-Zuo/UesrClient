@@ -12,6 +12,8 @@
   <!--检测相机配置-->
   <cameras>
     <camera id="1" />
+    <camera id="2" />
+    <camera id="3" />
   </cameras>
 
   <!--心跳包发送周期, ms-->
@@ -36,12 +38,20 @@
 
   <image>
     <!--本地存储-->
-    <localPath>E:/LocalImage/</localPath>
+    <!--<localPath>E:/LocalImage/</localPath>-->
+    
     <!--历史数据存储根目录-->
     <historyPath>E:/Images/</historyPath>
     <!--历史数据存储目录是否使用配置文件-->
     <historyUserLocal>false</historyUserLocal>
   </image>
-  
 
+  <!--单机调试-->
+  <debug>
+    <!--启用-->
+    <enable>false</enable>
+    <!--未配置NAS，单机存储图片位置-->
+    <path>E:/Images/</path>
+  </debug>
+  
 </configure>

@@ -9,9 +9,6 @@ namespace Inspect.Entities
 {
     public class ConfigImageSave
     {
-        [XmlElement(ElementName = "localPath")]
-        public string LocalImagePath { get; set; }
-
         [XmlElement(ElementName = "historyPath")]
         public string HistoryImagePath { get; set; }
 

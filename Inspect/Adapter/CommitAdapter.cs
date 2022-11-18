@@ -40,7 +40,11 @@ namespace Inspect.Adapter
             body.Add("result", result);
             await HttpHelper.PostJsonAsync(url, JsonConvert.SerializeObject(body));
         }
-
+        /// <summary>
+        /// 2.1.2模块参数获取
+        /// </summary>
+        /// <param name="cameraId"></param>
+        /// <returns></returns>
         public CameraParamsEntity GetCameraParams(int cameraId)
         {
             string url = BaseUrl + "/setup/module_params";
@@ -50,7 +54,13 @@ namespace Inspect.Adapter
             var res = GetData(url, JsonConvert.SerializeObject(body));
             return JsonConvert.DeserializeObject<CameraParamsEntity>(res.ToString());
         }
-
+        /// <summary>
+        /// 2.1.8当前相机参数获取
+        /// </summary>
+        /// <param name="cameraId"></param>
+        /// <param name="recipe"></param>
+        /// <param name="mmg"></param>
+        /// <returns></returns>
         public CameraRecipeParamsEntity GetCameraRecipeParams(int cameraId, int recipe, int mmg = 0)
         {
             string url = BaseUrl + "/setup/camera_params";
@@ -61,7 +71,12 @@ namespace Inspect.Adapter
             var res = GetData(url, JsonConvert.SerializeObject(body));
             return JsonConvert.DeserializeObject<CameraRecipeParamsEntity>(res.ToString());
         }
-
+        /// <summary>
+        /// 2.1.14传统算法检测参数获取
+        /// </summary>
+        /// <param name="recipe"></param>
+        /// <param name="mmg"></param>
+        /// <returns></returns>
         public object GetTradAlgoRecipeParams(int recipe, int mmg = 0)
         {
             string url = BaseUrl + "/setup/trad_algo_insp_params";
@@ -85,14 +100,22 @@ namespace Inspect.Adapter
 
             return JsonConvert.DeserializeObject<RecipeParamEntity>(res.ToString());
         }
-
+        /// <summary>
+        /// 2.1.1设备参数获取
+        /// </summary>
+        /// <returns></returns>
         public DeviceParamEntity GetDeviceParam()
         {
             string url = BaseUrl + "/setup/dev_params";
             var res = GetData(url, "");
             return JsonConvert.DeserializeObject<DeviceParamEntity>(res.ToString());
         }
-
+        /// <summary>
+        /// 2.1.17图像预处理参数获取
+        /// </summary>
+        /// <param name="recipe"></param>
+        /// <param name="mmg"></param>
+        /// <returns></returns>
         public ImagePreProcessParamsEntity GetImagePreProcessParams(int recipe, int mmg = 0)
         {
             string url = BaseUrl + "/setup/image_pre_process_params";

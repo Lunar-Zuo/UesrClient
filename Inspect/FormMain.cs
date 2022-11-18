@@ -116,7 +116,7 @@ namespace Inspect
 
                 ValidAlgoServList.Add(AlgoViewList[i]);
                 OnStartAlgoServ(AlgoViewList[i]._Port);
-                HearbeatAdapter.Instance.AlgorithmStatusChange(Config.Cameras[0].CameraId.ToString(), Constant.AlgorithmUnNormal);
+                HearbeatAdapter.Instance.AlgorithmStatusChange(Config.Cameras[0].CameraId_local.ToString(), Constant.AlgorithmUnNormal);
                 AlgorithmAdapter.Instance.AddAlogServ(AlgoViewList[i]._Port);
                 TimeUtils.Yield(200);
             }
@@ -159,7 +159,7 @@ namespace Inspect
                     if (!view._Status) count++;
                 }
 
-                HearbeatAdapter.Instance.AlgorithmStatusChange(Config.Cameras[0].CameraId.ToString(), count > 0 ? 0 : 1);
+                HearbeatAdapter.Instance.AlgorithmStatusChange(Config.Cameras[0].CameraId_local.ToString(), count > 0 ? 0 : 1);
             }
             catch (Exception ex)
             {

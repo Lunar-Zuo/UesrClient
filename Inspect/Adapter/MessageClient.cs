@@ -57,7 +57,7 @@ namespace Inspect.Adapter
         }
 
         /// <summary>
-        /// 
+        /// 检测完成信号
         /// </summary>
         /// <param name="sn"></param>
         /// <param name="panelId"></param>
