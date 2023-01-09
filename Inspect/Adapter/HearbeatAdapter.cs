@@ -74,22 +74,6 @@ namespace Inspect.Adapter
             return res;
         }
 
-        private object GetAlgorithmStatus()
-        {
-            List<object> res = new List<object>();
-            lock (asLock)
-            {
-                foreach (var item in AlgorithmStatusList)
-                {
-                    Dictionary<string, object> map = new Dictionary<string, object>();
-                    map["name"] = item.Key;
-                    map["status"] = item.Value;
-                    res.Add(map);
-                }
-            }
-            return res;
-        }
-
         private void OnTimerdEvent(object sender, ElapsedEventArgs e)
         {
             if (!Enable) return;
@@ -97,7 +81,6 @@ namespace Inspect.Adapter
             {
                 Dictionary<string, object> data = new Dictionary<string, object>();
                 data.Add("camera", GetCameraStatus());
-                data.Add("algorithm", GetAlgorithmStatus());
                 MessageClient.Instance.SendMessageToServerAsync(CwCommon.Commons.WsCmdName.WsCmdHeartbeat, data);
             }
             catch (Exception ex)

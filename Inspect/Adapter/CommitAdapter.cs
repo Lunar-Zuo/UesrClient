@@ -41,38 +41,35 @@ namespace Inspect.Adapter
             await HttpHelper.PostJsonAsync(url, JsonConvert.SerializeObject(body));
         }
         /// <summary>
-        /// 2.1.2模块参数获取
+        /// 3.1.3相机位置字典表获取
         /// </summary>
         /// <param name="cameraId"></param>
         /// <returns></returns>
-        public CameraParamsEntity GetCameraParams(int cameraId)
+        public List<CameraParamsEntity> GetCameraParams()
         {
-            string url = BaseUrl + "/setup/module_params";
+            string url = BaseUrl + "/setup/camera_pos_dict";
             Dictionary<string, object> body = new Dictionary<string, object>();
-            body.Add("cameraId", cameraId);
-            body.Add("moduleId", 2);
             var res = GetData(url, JsonConvert.SerializeObject(body));
-            return JsonConvert.DeserializeObject<CameraParamsEntity>(res.ToString());
+            return JsonConvert.DeserializeObject<List<CameraParamsEntity>>(res.ToString());
         }
         /// <summary>
-        /// 2.1.8当前相机参数获取
+        /// 4.2.3获取检测相机参数(新)
         /// </summary>
         /// <param name="cameraId"></param>
         /// <param name="recipe"></param>
         /// <param name="mmg"></param>
         /// <returns></returns>
-        public CameraRecipeParamsEntity GetCameraRecipeParams(int cameraId, int recipe, int mmg = 0)
+        public CameraRecipeParamsEntity GetCameraRecipeParams(int cameraId, int recipe)
         {
-            string url = BaseUrl + "/setup/camera_params";
+            string url = BaseUrl + "/setup/get_insp_cam_params";
             Dictionary<string, object> body = new Dictionary<string, object>();
             body.Add("cameraId", cameraId);
-            body.Add("recipePlc", recipe);
-            body.Add("mmg", mmg);
+            body.Add("recipeId", recipe);
             var res = GetData(url, JsonConvert.SerializeObject(body));
             return JsonConvert.DeserializeObject<CameraRecipeParamsEntity>(res.ToString());
         }
         /// <summary>
-        /// 2.1.14传统算法检测参数获取
+        /// 4.3.6传统算法检测参数获取
         /// </summary>
         /// <param name="recipe"></param>
         /// <param name="mmg"></param>
@@ -87,21 +84,17 @@ namespace Inspect.Adapter
             return res;
         }
         /// <summary>
-        /// 获取Recipe基础参数
+        /// 3.2.2高级设备参数获取
         /// </summary>
         /// <returns></returns>
-        public RecipeParamEntity GetRecipeParam(int recipe, int mmg = 0)
+        public DeviceParamExtEntity GetDeviceParamExt()
         {
-            string url = BaseUrl + "/setup/recipe_base";
-            Dictionary<string, object> body = new Dictionary<string, object>();
-            body.Add("recipePlc", recipe);
-            body.Add("mmg", mmg);
-            var res = GetData(url, JsonConvert.SerializeObject(body));
-
-            return JsonConvert.DeserializeObject<RecipeParamEntity>(res.ToString());
+            string url = BaseUrl + "/setup/dev_params_ext";
+            var res = GetData(url, "");
+            return JsonConvert.DeserializeObject<DeviceParamExtEntity>(res.ToString());
         }
         /// <summary>
-        /// 2.1.1设备参数获取
+        /// 3.2.1设备参数获取
         /// </summary>
         /// <returns></returns>
         public DeviceParamEntity GetDeviceParam()
@@ -111,7 +104,7 @@ namespace Inspect.Adapter
             return JsonConvert.DeserializeObject<DeviceParamEntity>(res.ToString());
         }
         /// <summary>
-        /// 2.1.17图像预处理参数获取
+        /// 4.3.9图像预处理参数获取
         /// </summary>
         /// <param name="recipe"></param>
         /// <param name="mmg"></param>

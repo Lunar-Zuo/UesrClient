@@ -70,14 +70,15 @@ namespace Inspect.Adapter
                 body.Add("ngPath", ngPath);
                 body.Add("setupFileName", setupFile);
                 body.Add("panelCode", panelCode);
-                body.Add("sliceId", recipeId);//算法需要传recipe
+                body.Add("recipeId", recipeId);
                 body.Add("cameraId", cameraId);
                 body.Add("imageId", imageId);
                 //LoggerHelper.Debug(url);
                 LoggerHelper.Debug(JsonConvert.SerializeObject(body));
                 string res = await HttpHelper.PostJsonAsync(url, JsonConvert.SerializeObject(body));
-                
                 LoggerHelper.Debug("算法返回res：" + res);
+                string res1 = RanksConvert(res, recipeId);
+                LoggerHelper.Debug("数据处理返回res1：" + res1);
 
                 return JsonConvert.DeserializeObject<ResponseEntity>(res);
 
@@ -113,14 +114,14 @@ namespace Inspect.Adapter
                 //LoggerHelper.Debug("处理第二步(得到具体缺陷数据de.Data)：" + JsonConvert.SerializeObject(de.Data));
                 if (de.Count != 0)
                 {
-                    //获取端子朝向 和 行列值
-                    RecipeParamEntity RecipeParam = CommitAdapter.Instance.GetRecipeParam(recipeId);
-                    LoggerHelper.Debug("获取后台recipe基础配置：" + JsonConvert.SerializeObject(RecipeParam));
+                    //获取像素转换距离因子值
+                    DeviceParamExtEntity DeviceParamExt = CommitAdapter.Instance.GetDeviceParamExt();
+                    LoggerHelper.Debug("获取后台像素转换距离因子值：" + JsonConvert.SerializeObject(DeviceParamExt));
 
                     //LoggerHelper.Debug("后台基础参数数据：" + JsonConvert.DeserializeObject<ResponseEntity>(RecipeParam.ToString()));
-                    int rowTotal = Convert.ToInt32(RecipeParam.rowTotal);
-                    int columnTotal = Convert.ToInt32(RecipeParam.columnTotal);
-                    int duanzi = Convert.ToInt32(RecipeParam.DuanZi);
+                    int rowTotal = 1;
+                    int columnTotal = 1;
+                    int duanzi = 1;
                     int count = 0;
                     //行列转换
                     foreach (DefectDataEntity detefectData in de.Data)
@@ -174,46 +175,59 @@ namespace Inspect.Adapter
             }
         }
 
+        #region 调用本地算法（本地调试使用）
+        /// <summary>
+        /// 算法检测请求（本地调试时使用）
+        /// </summary>
+        /// <param name="imageFile"></param>
+        /// <param name="ngPath"></param>
+        /// <param name="setupFile"></param>
+        /// <param name="panelCode"></param>
+        /// <param name="slice"></param>
+        /// <param name="cameraId"></param>
+        /// <param name="imageId"></param>
+        /// <returns></returns>
         public DefectInspectResEntity TradInspectRequest(string imageFile, string ngPath, string setupFile, string panelCode, int slice, int cameraId, int imageId)
         {
-            //lock (objlock)
-            //{
-            System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
-            watch.Start();//开始时间
-
-            byte[] buffer = new byte[256];
-            int len = buffer.Length;
-            LoggerHelper.Info(string.Format("算法图片路径：{0} ,算法文件路径：{1},ngPath:{2},panelCode:{3},slice:{4},cameraId:{5},imageId:{6}", imageFile, setupFile, ngPath, panelCode, slice, cameraId, imageId));
-            var ret = DefectInspect(Encoding.Default.GetBytes(imageFile),
-                Encoding.Default.GetBytes(ngPath),
-                Encoding.Default.GetBytes(setupFile),
-                Encoding.Default.GetBytes(panelCode),
-                slice, cameraId, imageId, ref buffer[0], ref len);
-
-            DefectInspectResEntity data = new DefectInspectResEntity()
+            lock (objlock)
             {
-                Count = ret
-            };
+                System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+                watch.Start();//开始时间
 
-            if (ret > 0)
-            {
-                string name = System.Text.Encoding.Default.GetString(buffer, 0, len);
+                byte[] buffer = new byte[256];
+                int len = buffer.Length;
+                LoggerHelper.Info(string.Format("算法图片路径：{0} ,算法文件路径：{1},ngPath:{2},panelCode:{3},slice:{4},cameraId:{5},imageId:{6}", imageFile, setupFile, ngPath, panelCode, slice, cameraId, imageId));
+                var ret = DefectInspect(Encoding.Default.GetBytes(imageFile),
+                    Encoding.Default.GetBytes(ngPath),
+                    Encoding.Default.GetBytes(setupFile),
+                    Encoding.Default.GetBytes(panelCode),
+                    slice, cameraId, imageId, ref buffer[0], ref len);
 
-                var defectData = System.IO.File.ReadAllText(name);
+                DefectInspectResEntity data = new DefectInspectResEntity()
+                {
+                    Count = ret
+                };
 
-                //LoggerHelper.Info("算法返回缺陷数据： " + defectData);
-                data.Data = JsonConvert.DeserializeObject<List<DefectDataEntity>>(defectData);
+                if (ret > 0)
+                {
+                    string name = System.Text.Encoding.Default.GetString(buffer, 0, len);
+
+                    var defectData = System.IO.File.ReadAllText(name);
+
+                    LoggerHelper.Info("算法返回缺陷数据： " + defectData);
+                    data.Data = JsonConvert.DeserializeObject<List<DefectDataEntity>>(defectData);
+                }
+                watch.Stop();//结束时间
+                TimeSpan timespan = watch.Elapsed;//相差时间
+                LoggerHelper.Info("算法处理时长： " + timespan.TotalMilliseconds + "ms");
+
+                return data;
             }
-            watch.Stop();//结束时间
-            TimeSpan timespan = watch.Elapsed;//相差时间
-            LoggerHelper.Info("算法处理时长： " + timespan.TotalMilliseconds + "ms");
-
-            return data;
-            //}
         }
 
         [DllImport(@"C:\AlgoLibs\TradAlgoDll.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
         public static extern int DefectInspect(byte[] imageFile, byte[] ngPath, byte[] setupFile, byte[] panelCode,
             int sliceId, int cameraId, int imageId, ref byte defectFile, ref int size);
+        #endregion
     }
 }

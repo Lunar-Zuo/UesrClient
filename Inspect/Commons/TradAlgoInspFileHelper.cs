@@ -48,21 +48,6 @@ namespace Inspect.Commons
                 }
             }
         }
-        /// <summary>
-        /// 获取的Recipe基础参数生成ini文件  RCJudge
-        /// </summary>
-        /// <param name="pathname"></param>
-        /// <param name="re"></param>
-        public static void WriteTradAlgoInspFile(string pathname, RecipeParamEntity re)
-        {
-            Dictionary<string, dynamic> data = (Dictionary<string, dynamic>)MakeNameList(re);
-            foreach (var item in data)
-            {
-                string key = item.Key;
-                var val = item.Value.ToString();
-                if (key != "DuanZi") { WritePrivateProfileString(DefectInfoSector, key, val, pathname); }
-            }
-        }
 
         private static object MakeNameList(object obj)
         {

@@ -24,9 +24,11 @@ namespace Inspect
         /// </summary>
         protected static Dictionary<int, InspectCamera> CameraList = new Dictionary<int, InspectCamera>();
         public static DeviceParamEntity DeviceParams = null;
-        public static RecipeParamEntity RecipeParams = null;
+        public static DeviceParamExtEntity DeviceParamsExt = null;
+        public static List<CameraParamsEntity> CameraParams = null;
         public static ConfigEntity Config = null;
         private int iRecipe = -1;
+        private bool isInspet = false;
 
         protected async void StartUpAsync()
         {
@@ -35,7 +37,7 @@ namespace Inspect
                 try
                 {
                     HearbeatAdapter.Instance.Enable = false;
-                    
+
                     //后台数据提交模块初始化
                     CommitAdapter.Instance.Init(Config.CommitUrlBase, Config.ProgramId);
 
@@ -43,7 +45,7 @@ namespace Inspect
                     LoadDeviceParams();
 
                     //初始化相机对象模块
-                    //InitInspectCameras(Config.Cameras);//修改后台获取相机id，连接主程序再初始化相机
+                    InitInspectCameras(Config.Cameras);
 
                     //初始化主从交互模块
                     InitMessageClient(Config.WsServerUrl, Config.ProgramId);
@@ -87,9 +89,11 @@ namespace Inspect
         protected void LoadDeviceParams()
         {
             DeviceParams = CommitAdapter.Instance.GetDeviceParam();
+            DeviceParamsExt = CommitAdapter.Instance.GetDeviceParamExt();
+            CameraParams = CommitAdapter.Instance.GetCameraParams();
         }
         /// <summary>
-        /// 初始化相机对象，加载界面配置的相机
+        /// 初始化相机对象，加载相机Id
         /// </summary>
         /// <param name="list"></param>
         /// <param name="autoStart"></param>
@@ -100,22 +104,22 @@ namespace Inspect
                 foreach (var item in list)
                 {
                     InspectCamera camera = new InspectCamera();
-                    camera.CameraId = item.CameraId;
+                    camera.CameraId = item.CameraId_local;
 
                     camera.HistoryUserLocal = Config.ImageSave.UserLocalHistoryPath;
                     if (Config.ImageSave.UserLocalHistoryPath)
                     {
-                        //camera.LocalPathBase = Config.ImageSave.LocalImagePath;
+                        camera.LocalPathBase = Config.ImageSave.ImageCachePath;
                         camera.HistoryPathBase = Config.ImageSave.HistoryImagePath;
                     }
                     else
                     {
-                        //camera.LocalPathBase = DeviceParams.OriginImageStoragePath;
+                        camera.LocalPathBase = DeviceParamsExt.ImageCachePath;
                         camera.HistoryPathBase = DeviceParams.HistoryImageStoragePath;
                     }
                     camera.CameraStatusChangeHandler += HearbeatAdapter.Instance.CameraStatusChange;
                     camera.CameraInspectCompleteHandler += OnInspectComplete;
-                    CameraList.Add(item.CameraId, camera);
+                    CameraList.Add(item.CameraId_local, camera);
                 }
             }
             catch (Exception ex)
@@ -134,6 +138,7 @@ namespace Inspect
         private void OnInspectComplete(string sn, string panelId, int cameraId, int errCode)
         {
             MessageClient.Instance.SendInspectCompleteToServer(sn, panelId, errCode);
+            isInspet = false;
             //删除本地原图
             //DeleteFile(DeviceParams.OriginImageStoragePath,DeviceParams.OriginImageStorageDays);
             //CleanFile("D:/DefectData", 0/*DeviceParams.DataStorageDays*/);
@@ -197,11 +202,6 @@ namespace Inspect
                     if (recipe <= 0) throw new Exception("请求Recipe值异常，recipe=" + recipe);
                     if (_Recipe == recipe) return;
 
-                    RecipeParams = CommitAdapter.Instance.GetRecipeParam(recipe);
-                    //初始化相机对象模块
-                    InitInspectCameras(RecipeParams.Cameras);
-
-
                     foreach (var cam in CameraList)
                     {
                         //开启相机线程
@@ -237,13 +237,20 @@ namespace Inspect
                     {
                         if (!Config.ImageSave.UserLocalHistoryPath)
                         {
-                            //cam.Value.LocalPathBase = DeviceParams.OriginImageStoragePath;
+                            cam.Value.LocalPathBase = DeviceParamsExt.ImageCachePath;
                             cam.Value.HistoryPathBase = DeviceParams.HistoryImageStoragePath;
                         }
-
-                        cam.Value.UpdateParams(_Recipe);
+                        LoggerHelper.Info($"配置更新,检测状态{isInspet},准备重启相机,写入参数！");
+                        if (!isInspet)
+                        {   //点击配置更新，会重新加载相机
+                            cam.Value.Reload(_Recipe);
+                        }
+                        else
+                        {
+                            cam.Value.UpdateParams(_Recipe);
+                        }
                     }
-                    
+
                     MessageClient.Instance.SendUpdateCompleteToServer(0);
 
                 }
@@ -272,12 +279,12 @@ namespace Inspect
                     if (recipe <= 0) throw new Exception("请求Recipe值异常，recipe=" + recipe);
                     if (recipe != _Recipe)
                     {
-                        
+
                         foreach (var cam in CameraList)
                         {
                             if (!Config.ImageSave.UserLocalHistoryPath)
                             {
-                                //cam.Value.LocalPathBase = DeviceParams.OriginImageStoragePath;
+                                cam.Value.LocalPathBase = DeviceParamsExt.ImageCachePath;
                                 cam.Value.HistoryPathBase = DeviceParams.HistoryImageStoragePath;
                             }
 
@@ -298,7 +305,7 @@ namespace Inspect
             });
         }
         /// <summary>
-        /// 
+        /// 检测停止
         /// </summary>
         private void OnInspectStop()
         {
@@ -326,6 +333,7 @@ namespace Inspect
         {
             try
             {
+                isInspet = true;
                 LoggerHelper.Info(string.Format("sn={0} panelId={1} recipe={2} path={3}", sn, panelId, recipe, path));
 
                 //创建本地图存储目录
@@ -343,7 +351,7 @@ namespace Inspect
                     item.InspectStart(sn, panelId, recipe, path);
                 }
                 MessageClient.Instance.SendInspectStartResToServer(0, sn);
-                LoggerHelper.Info("检测端应答成功，PanelID="+panelId);
+                LoggerHelper.Info("检测端应答成功，PanelID=" + panelId);
             }
             catch (Exception ex)
             {
@@ -363,44 +371,6 @@ namespace Inspect
         }
         protected virtual void SetRecipe(int recipe) { }
         protected virtual void SetInspectInfo(string sn, string panelCode, int recipe, string path) { }
-        /// <summary>
-        /// 定期删除文件夹
-        /// </summary>
-        /// <param name="fileDirect"></param>
-        /// <param name="saveDay"></param>
-        private void DeleteFile(string fileDirect, int saveDay)
-        {
-            DateTime nowTime = DateTime.Now;
-            DirectoryInfo root = new DirectoryInfo(fileDirect);
-            DirectoryInfo[] dics = root.GetDirectories();//获取文件夹
-
-            FileAttributes attr = File.GetAttributes(fileDirect);
-            if (attr == FileAttributes.Directory)//判断是不是文件夹
-            {
-                foreach (DirectoryInfo file in dics)//遍历文件夹
-                {
-                    TimeSpan t = nowTime - file.CreationTime;  //当前时间  减去 文件创建时间
-                    int day = t.Days;
-                    if (day > saveDay)   //保存的时间 ；  单位：天
-                    {
-                        Directory.Delete(file.FullName, true);  //删除超过时间的文件夹
-                    }
-                }
-            }
-        }
-        public void CleanFile(string path, int saveDay)
-        {
-            DirectoryInfo dir = new DirectoryInfo(path);
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                if (file.LastWriteTime < DateTime.Now.AddDays(-saveDay))
-                {
-                    file.Delete();
-                }
-            }
-        }
-
 
     }
 

@@ -55,7 +55,6 @@ namespace Inspect.Adapter
             body.Add("imageId", imageId);
             SendMessageToServerAsync(CwCommon.Commons.WsCmdName.WsCmdInspectError, JsonConvert.SerializeObject(body));
         }
-
         /// <summary>
         /// 检测完成信号
         /// </summary>
@@ -69,26 +68,6 @@ namespace Inspect.Adapter
             body.Add("panelCode", panelId);
             body.Add("errCode", errCode);
             SendMessageToServerAsync(CwCommon.Commons.WsCmdName.WsCmdInspectComplete, JsonConvert.SerializeObject(body));
-        }
-        /// <summary>
-        /// 将缩略图信息发送给主程序
-        /// </summary>
-        /// <param name="sn"></param>
-        /// <param name="panelId"></param>
-        /// <param name="slice"></param>
-        /// <param name="cam"></param>
-        /// <param name="image"></param>
-        /// <param name="data"></param>
-        public void SendRealThumbToServer(string sn, string panelId, int slice, int cam, int image, string data)
-        {
-            Dictionary<string, object> body = new Dictionary<string, object>();
-            body.Add("serialNumber", sn);
-            body.Add("panelCode", panelId);
-            body.Add("sliceId", slice);
-            body.Add("cameraId", cam);
-            body.Add("imageId", image);
-            body.Add("image", data);
-            SendMessageToServerAsync(CwCommon.Commons.WsCmdName.WsCmdCapturedImage, JsonConvert.SerializeObject(body));
         }
         /// <summary>
         /// 缺陷信息给主程序

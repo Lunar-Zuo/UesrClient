@@ -9,8 +9,10 @@ namespace Inspect.Entities
 {
     public class CameraParamsEntity
     {
-
-        public int Id { get; set; }
+        [JsonProperty("number")]
+        public int CameraId { get; set; }
+        [JsonProperty("name")]
+        public int CameraName { get; set; }
 
         [JsonProperty("slice")]
         public int SliceId { get; set; }

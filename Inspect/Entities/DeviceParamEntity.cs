@@ -7,26 +7,29 @@ using System.Threading.Tasks;
 
 namespace Inspect.Entities
 {
+    /// <summary>
+    /// 基础设置参数
+    /// </summary>
     public class DeviceParamEntity
     {
 
         /// <summary>
-        /// 压缩图存储地址
+        /// NAS原图存储地址
         /// </summary>
         [JsonProperty("historyImageStoragePath")]
         public string HistoryImageStoragePath { get; set; }
         /// <summary>
-        /// 压缩图存储天数
+        /// NAS原图存储天数
         /// </summary>
         [JsonProperty("historyImageStorageDays")]
         public int HistoryImageStorageDays { get; set; }
         /// <summary>
-        /// 原图存储地址
+        /// 缓存图存储地址
         /// </summary>
-        [JsonProperty("originImageStoragePath")]
+        [JsonProperty("imageCachePath")]
         public string OriginImageStoragePath { get; set; }
         /// <summary>
-        /// 原图存储天数
+        /// 缓存图存储天数
         /// </summary>
         [JsonProperty("originImageStorageDays")]
         public int OriginImageStorageDays { get; set; }

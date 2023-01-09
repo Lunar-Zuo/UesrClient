@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Inspect</RootNamespace>
     <AssemblyName>Inspect</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -129,6 +129,7 @@
     <Compile Include="Adapter\DalsaCameraAdapter.cs" />
     <Compile Include="Adapter\HearbeatAdapter.cs" />
     <Compile Include="Adapter\MessageClient.cs" />
+    <Compile Include="Adapter\ToolAdapter.cs" />
     <Compile Include="Commons\Constant.cs" />
     <Compile Include="Commons\CountUtils.cs" />
     <Compile Include="Commons\TradAlgoInspFileHelper.cs" />
@@ -143,12 +144,12 @@
     <Compile Include="Entities\DefectDensityEntity.cs" />
     <Compile Include="Entities\DefectInspectResEntity.cs" />
     <Compile Include="Entities\DeviceParamEntity.cs" />
+    <Compile Include="Entities\DeviceParamExtEntity.cs" />
     <Compile Include="Entities\ImagePreProcessParamsEntity.cs" />
     <Compile Include="Entities\InspectEdgeEntity.cs" />
     <Compile Include="Entities\InspectImageInfoEntity.cs" />
     <Compile Include="Entities\InspectParamEntity.cs" />
     <Compile Include="Entities\InspectStartEntity.cs" />
-    <Compile Include="Entities\RecipeParamEntity.cs" />
     <Compile Include="Entities\RecipeSwitchReqEntity.cs" />
     <Compile Include="Entities\TradAlgoInspParamEntity.cs" />
     <Compile Include="Entities\TradAlgoDefectParamEntity.cs" />
