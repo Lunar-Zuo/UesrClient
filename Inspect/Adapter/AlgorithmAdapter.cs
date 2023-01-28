@@ -45,7 +45,29 @@ namespace Inspect.Adapter
                 PointList.Add(port);
             }
         }
+        public async void InspectRecipeRequest(int recipeId, string data)
+        {
+            string port = "";
+            try
+            {
+                port = GetPoint();
+                string url = GetBaseUrl(port) + "/api/algorithm/inspect_recipe_params";
+                Dictionary<string, object> body = new Dictionary<string, object>();
+                body.Add("recipeId", recipeId);
+                body.Add("data", data);
 
+                LoggerHelper.Debug(JsonConvert.SerializeObject(body));
+                await HttpHelper.PostJsonAsync(url, JsonConvert.SerializeObject(body));
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                if (!string.IsNullOrEmpty(port)) SetPoint(port);
+            }
+        }
         /// <summary>
         /// 算法检测请求
         /// </summary>
@@ -94,7 +116,7 @@ namespace Inspect.Adapter
         }
 
         /// <summary>
-        /// 行列数据转换（2022.09.17测试完成）
+        /// 行列数据转换
         /// </summary>
         /// <param name="res">算法结果</param>
         /// <param name="RecipeParam">后台数据，需要行列与端子朝向</param>

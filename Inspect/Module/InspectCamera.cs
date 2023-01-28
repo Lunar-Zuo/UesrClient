@@ -25,20 +25,19 @@ namespace Inspect.Module
         public event CameraInspectCompleteDelegate CameraInspectCompleteHandler;
 
         private DalsaCameraAdapter device = null;
-
         private CameraParamsEntity cameraParam = null;
         private CameraRecipeParamsEntity cameraRecipeParam = null;
         private ImagePreProcessParamsEntity preProcessParams = null;
 
         //针对当前相机是否完成处理
         private Dictionary<string, CountUtils> PanelProcess = new Dictionary<string, CountUtils>();
+
         private object _PanelProcessLock = new object();
 
         private bool bCameraOn = false;
 
         public bool IsInspecting { get; set; }
         public string SliceName { get; set; }
-        //public int SliceId { get; set; }
         public int CameraId { get; set; }
         public bool HistoryUserLocal = false;
         public string HistoryPathBase = @"E:\Images";
@@ -55,7 +54,7 @@ namespace Inspect.Module
         private string _RelativePath;
 
         /// <summary>
-        /// 后台加载参数，开启相机线程
+        /// 初始化，加载后台参数，开启相机线程
         /// </summary>
         /// <param name="recipe"></param>
         public void Create(int recipe)
@@ -69,26 +68,46 @@ namespace Inspect.Module
 
             LoadParams(recipe);
 
+            /* 相机7->   短1-45
+             * 相机8->   短1-90
+             * 相机9->   短2-45
+             * 相机10->  短1-90
+             */
+            int CameraDevice = GetCameraDevice(CameraId);
+            device = new DalsaCameraAdapter();
+            device.CameraConnectionStatusHandler += OnCameraConnectionStatus;
+            device.ConfigFileName = cameraRecipeParam.FileName;
+            //device.OpenDevice();
+            device.GigeOpenDevice(CameraDevice);
+
+            device.SetFeatureValueDouble(DalsaCameraAdapter.FeatureNameGain, double.Parse(cameraRecipeParam.Gain));
+            device.SetFeatureValueDouble(DalsaCameraAdapter.FeatureNameExposureTime, double.Parse(cameraRecipeParam.ExposureTime));
             if (cameraRecipeParam.Usable == 1)
             {
-                device = new DalsaCameraAdapter();
-                device.CameraConnectionStatusHandler += OnCameraConnectionStatus;
-                device.ConfigFileName = cameraRecipeParam.FileName;
-                device.OpenDevice();
-
-                device.SetFeatureValueDouble(DalsaCameraAdapter.FeatureNameGain, double.Parse(cameraRecipeParam.Gain));
-                device.SetFeatureValueDouble(DalsaCameraAdapter.FeatureNameExposureTime, double.Parse(cameraRecipeParam.ExposureTime));
-
                 device.CameraCapuredDataHandler += OnCameraCapturedData;
                 device.StartCapture();
                 bCameraOn = true;
             }
+        }
+        public int GetCameraDevice(int CameraId)
+        {
+            ConfigEntity configEntity = LoadConfig();
+            int cameraDevice = 0;
+            foreach (ConfigCameraEntity ConfigCamera in configEntity.Cameras)
+            {
+                if (CameraId == ConfigCamera.CameraId_local)
+                {
+                    cameraDevice = ConfigCamera.CameraDevice;
+                }
+            }
+            return cameraDevice;
         }
 
         public void Destroy()
         {
             if (bCameraOn)
             {
+                device.StopCapture();
                 device.CloseDevice();
                 device.CameraCapuredDataHandler -= OnCameraCapturedData;
                 device = null;
@@ -96,7 +115,7 @@ namespace Inspect.Module
             }
         }
         /// <summary>
-        /// 后台拿数据，开启相机线程
+        /// 初始化，后台拿数据，开启相机线程
         /// </summary>
         /// <param name="recipe"></param>
         public void Reload(int recipe)
@@ -116,45 +135,62 @@ namespace Inspect.Module
             device.StartCapture();
         }
         /// <summary>
-        /// 加载后台图像预处理、相机参数
+        /// 加载后台相机参数、算法参数、图像预处理
         /// </summary>
         /// <param name="recipe"></param>
         public void LoadParams(int recipe)
         {
             LoadCameraRecipeParams(recipe);
             //LoadRecipeAlgorithmParams(recipe);
-            LoadImagePreProcessParams(recipe);
-            LoadAlgoParams();
+            //暂时不用
+            //LoadImagePreProcessParams(recipe);
+            //LoadAlgoParams();
 
-        }
-
-        private void LoadImagePreProcessParams(int recipe)
-        {
-            preProcessParams = CommitAdapter.Instance.GetImagePreProcessParams(recipe);
         }
 
         private void LoadCameraRecipeParams(int recipe)
         {
             cameraRecipeParam = CommitAdapter.Instance.GetCameraRecipeParams(CameraId, recipe);
         }
-
-        private void LoadAlgoParams()
-        {
-            //cameraParam = CommitAdapter.Instance.GetCameraParams(CameraId);
-            AlgorithmRecipeFileName = MainLogic.Config.Algorithm.RecipeFilePath + MainLogic.Config.Algorithm.RecipeFileName;//算法ini文件路径
-        }
-
         /// <summary>
-        /// 后台加载所有数据，包括相机参数，预处理参数、解析参数等
+        /// 后台加载算法传统参数数据，再传给算法
         /// </summary>
         public void LoadRecipeAlgorithmParams(int recipe)
         {
-            var res = CommitAdapter.Instance.GetTradAlgoRecipeParams(recipe);
-            string pathname = MainLogic.Config.Algorithm.RecipeFilePath + MainLogic.Config.Algorithm.RecipeFileName;
+            try
+            {
+                Dictionary<int, TradAlgoDefectParamEntity> AlgoDefectParam = new Dictionary<int, TradAlgoDefectParamEntity>();
+                int key = 0;
+                var res = CommitAdapter.Instance.GetTradAlgoRecipeParams(recipe);
 
-            List<TradAlgoInspParamEntity> data = JsonConvert.DeserializeObject<List<TradAlgoInspParamEntity>>(res.ToString());
-            TradAlgoInspFileHelper.WriteTradAlgoInspFile(pathname, data);
+                List<TradAlgoInspParamEntity> data = JsonConvert.DeserializeObject<List<TradAlgoInspParamEntity>>(res.ToString());
+                //string pathname = MainLogic.Config.Algorithm.RecipeFilePath + MainLogic.Config.Algorithm.RecipeFileName;
+                //TradAlgoInspFileHelper.WriteTradAlgoInspFile(pathname, data);
 
+                //后台获取的传统算法处理
+                foreach (TradAlgoInspParamEntity AlgoInspParam in data)
+                {
+                    AlgoDefectParam.Add(key, AlgoInspParam.Data);
+                    key++;
+                }
+                string AlgoDefectParams = JsonConvert.SerializeObject(AlgoDefectParam.Values).ToString();
+
+                //调用算法接口将传统算法参数传给算法
+                AlgorithmAdapter.Instance.InspectRecipeRequest(recipe, AlgoDefectParams);
+            }
+            catch (Exception ex)
+            {
+                LoggerHelper.Warn("算法传统参数传入失败，" + ex.Message);
+            }
+        }
+        private void LoadImagePreProcessParams(int recipe)
+        {
+            preProcessParams = CommitAdapter.Instance.GetImagePreProcessParams(recipe);
+        }
+        private void LoadAlgoParams()
+        {
+            //cameraParam = CommitAdapter.Instance.GetCameraParams(CameraId);
+            //AlgorithmRecipeFileName = MainLogic.Config.Algorithm.RecipeFilePath + MainLogic.Config.Algorithm.RecipeFileName;//算法ini文件路径
         }
 
         public void InspectStart(string SN, string panelId, int recipe, string path)
@@ -204,9 +240,9 @@ namespace Inspect.Module
         }
 
 
-        private string CreateFileName(string panelId, int SliceId, int imageId)
+        private string CreateFileName(string panelId, int EdgeId, int imageId)
         {
-            return string.Format("{0}_{1}_{2}_{3}", panelId, SliceId, CameraId, imageId);
+            return string.Format("{0}_{1}_{2}_{3}", panelId, EdgeId, CameraId, imageId);
         }
 
         /// <summary>
@@ -232,7 +268,7 @@ namespace Inspect.Module
                     RelativePath = _RelativePath,
                     ImageId = Interlocked.Increment(ref _ImageId),
                     HistoryFilePath = HistoryPathBase + "/" + _RelativePath + "/",
-                    LocalFilePath = LocalPathBase + "/" + _RelativePath + "/",
+                    //LocalFilePath = LocalPathBase + "/" + _RelativePath + "/",
                     ValidImageCount = 1/*cameraRecipeParam.ValidImageCount*/
                 };
                 ProcessCapturedData(buffer, width, height, info);
@@ -258,13 +294,10 @@ namespace Inspect.Module
                 try
                 {
                     //1.处理info信息
-                    string filename = CreateFileName(info.PanelId, cameraParam.SliceId, info.ImageId);
+                    string filename = CreateFileName(info.PanelId, cameraRecipeParam.EdgeId, info.ImageId);
                     //NAS上存的原图
                     info.HistoryFileName = HistoryPathBase + "/" + info.RelativePath + "/";
                     info.HistoryFileName = filename + ".jpg";
-                    //存的缓存图给算法
-                    info.LocalFileName = LocalPathBase + "/" + info.RelativePath + "/";
-                    info.LocalFileName = filename + ".jpg";
 
                     LoggerHelper.Info("收到照片 " + filename);
 
@@ -276,7 +309,7 @@ namespace Inspect.Module
                     var tInspect = AlgorithmProcess(org, info);
 
                     //4.历史图存储
-                    var tSave = HistoryImageSave(org, info);
+                    //var tSave = HistoryImageSave(org, info);
 
                     //5.等待异步线程处理完成
                     var inspResult = await tInspect;
@@ -286,7 +319,7 @@ namespace Inspect.Module
                     if (inspResult == null)
                     {
                         //检测异常
-                        MessageClient.Instance.SendInspectErrorToServer(info.SerialNumber, info.PanelId, cameraParam.SliceId, 0, info.ImageId);
+                        MessageClient.Instance.SendInspectErrorToServer(info.SerialNumber, info.PanelId, cameraRecipeParam.EdgeId, 0, info.ImageId);
                     }
                     else
                     {
@@ -295,11 +328,11 @@ namespace Inspect.Module
                         int result = res.Count > 0 ? Constant.JudgeNG : Constant.JudgeOK;
                         //7.向数据后台提交数据
                         CommitAdapter.Instance.CommitInspectResult(info.SerialNumber,
-                            info.PanelId, cameraParam.SliceId, CameraId, info.ImageId, info.HistoryFileName, res.Data, result);
+                            info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId, info.HistoryFileName, res.Data, result);
 
                         //8.结果发送给Server
                         MessageClient.Instance.SendDefectDataToSever(info.SerialNumber,
-                            info.PanelId, cameraParam.SliceId, CameraId, info.ImageId, res.Data, result);
+                            info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId, res.Data, result);
 
                         //count<0 算法异常
                         if (res.Count < 0)
@@ -361,11 +394,11 @@ namespace Inspect.Module
             {
                 try
                 {
-                    #region 存图到NAS,缩略图传给算法
+                    #region 存缩略图  传给算法
                     Mat dst = new Mat();
                     Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / preProcessParams.HistoryImageScaleX), Height = (int)(src.Height / preProcessParams.HistoryImageScaleY) });
                     int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
-                    string pathname = info.LocalFilePath + info.LocalFileName;
+                    string pathname = info.HistoryFilePath + info.HistoryFileName;
                     Cv2.ImWrite(pathname, dst, param);
                     #endregion
 
@@ -373,32 +406,42 @@ namespace Inspect.Module
                     string arrpathname = arr.Replace("/", "\\");
                     Thread.Sleep(100);
                     LoggerHelper.Debug($"缓存图存图完成，路径：{arrpathname}，检测程序调用算法开始!");
-
+                    ConfigEntity configEntity = LoadConfig();
                     //2.调用算法（调试时使用）
-                    return AlgorithmAdapter.Instance.TradInspectRequest(arrpathname, info.HistoryFilePath, AlgorithmRecipeFileName, info.PanelId, cameraParam.SliceId, CameraId, info.ImageId);
-                    //2.调用算法
-                    ResponseEntity res = await AlgorithmAdapter.Instance.InspectRequest(arrpathname,
-                        info.HistoryFilePath,
-                        AlgorithmRecipeFileName,
-                        info.PanelId,
-                        /*cameraParam.SliceId*/
-                        info.Recipe,
-                        CameraId,
-                        info.ImageId);
-
-                    //删除缓存图
-                    ToolAdapter.Instance.CleanFile(arrpathname, 0);
-                    if (res.Code != 0)
+                    //return AlgorithmAdapter.Instance.TradInspectRequest(arrpathname, info.HistoryFilePath, AlgorithmRecipeFileName, info.PanelId, cameraParam.SliceId, CameraId, info.ImageId);
+                    if (configEntity.Algorithm.Enable)//本地配置文件算法开关
                     {
-                        //返回异常
-                        throw new Exception("算法请求异常," + res.Message);
+
+                        //2.调用算法
+                        ResponseEntity res = await AlgorithmAdapter.Instance.InspectRequest(arrpathname,
+                            info.HistoryFilePath,
+                            AlgorithmRecipeFileName,
+                            info.PanelId,
+                            /*cameraParam.SliceId*/
+                            info.Recipe,
+                            CameraId,
+                            info.ImageId);
+
+                        //删除缓存图
+                        //ToolAdapter.Instance.CleanFile(arrpathname, 0);
+
+                        if (res.Code != 0)
+                        {
+                            //返回异常
+                            throw new Exception("算法请求异常," + res.Message);
+                        }
+                        //3.返回算法结果
+                        return JsonConvert.DeserializeObject<DefectInspectResEntity>(res.Data.ToString());
                     }
-                    //3.返回算法结果
-                    return JsonConvert.DeserializeObject<DefectInspectResEntity>(res.Data.ToString());
+                    else
+                    {
+                        LoggerHelper.Info(string.Format("启用算法开关为{0} Panel={1} Slice={2} Cam={3} imageId={4} ", configEntity.Algorithm.Enable, info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId));
+                        return null;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    LoggerHelper.Warn(string.Format("Panel={0} Slice={1} Cam={2} imageId={3} {4}", info.PanelId, cameraParam.SliceId, CameraId, info.ImageId, ex.Message));
+                    LoggerHelper.Warn(string.Format("Panel={0} Slice={1} Cam={2} imageId={3} {4}", info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId, ex.Message));
                     return null;
                 }
             });
@@ -406,7 +449,7 @@ namespace Inspect.Module
 
 
         /// <summary>
-        /// 历史图（原图）存储NAS
+        /// 历史图（原图）存储
         /// </summary>
         /// <param name="src"></param>
         /// <param name="info"></param>
@@ -440,7 +483,7 @@ namespace Inspect.Module
                 catch (Exception ex)
                 {
                     LoggerHelper.Warn(string.Format("存储{0} {1} {2} image{3}异常, {4}",
-                        info.PanelId, cameraParam.SliceId, CameraId, info.ImageId, ex.Message));
+                        info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId, ex.Message));
                     return "";
                 }
             });

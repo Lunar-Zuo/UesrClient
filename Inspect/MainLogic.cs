@@ -6,6 +6,7 @@ using Inspect.Module;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -90,7 +91,7 @@ namespace Inspect
         {
             DeviceParams = CommitAdapter.Instance.GetDeviceParam();
             DeviceParamsExt = CommitAdapter.Instance.GetDeviceParamExt();
-            CameraParams = CommitAdapter.Instance.GetCameraParams();
+            //CameraParams = CommitAdapter.Instance.GetCameraParams();
         }
         /// <summary>
         /// 初始化相机对象，加载相机Id
@@ -109,12 +110,12 @@ namespace Inspect
                     camera.HistoryUserLocal = Config.ImageSave.UserLocalHistoryPath;
                     if (Config.ImageSave.UserLocalHistoryPath)
                     {
-                        camera.LocalPathBase = Config.ImageSave.ImageCachePath;
+                        //camera.LocalPathBase = Config.ImageSave.ImageCachePath;
                         camera.HistoryPathBase = Config.ImageSave.HistoryImagePath;
                     }
                     else
                     {
-                        camera.LocalPathBase = DeviceParamsExt.ImageCachePath;
+                        //camera.LocalPathBase = DeviceParamsExt.ImageCachePath;
                         camera.HistoryPathBase = DeviceParams.HistoryImageStoragePath;
                     }
                     camera.CameraStatusChangeHandler += HearbeatAdapter.Instance.CameraStatusChange;
@@ -201,14 +202,21 @@ namespace Inspect
 
                     if (recipe <= 0) throw new Exception("请求Recipe值异常，recipe=" + recipe);
                     if (_Recipe == recipe) return;
-
-                    foreach (var cam in CameraList)
+                    if (!Config.Debug.DebugEnable)
                     {
-                        //开启相机线程
-                        cam.Value.Reload(recipe);
+                        foreach (var cam in CameraList)
+                        {
+                            //开启相机线程
+                            cam.Value.Reload(recipe);
+                            LoggerHelper.Info($"程序Recipe处理成功，相机{cam.Value.CameraId}初始化完成");
+                        }
+                        _Recipe = recipe;
                     }
-                    _Recipe = recipe;
-                    LoggerHelper.Info("主程序通知Recipe处理成功，相机初始化完成");
+                    else 
+                    {
+                        _Recipe = recipe;
+                        LoggerHelper.Info("单机调试，不加载相机，处理主程序通知Recipe成功");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -231,26 +239,28 @@ namespace Inspect
 
                     //加载设备参数
                     LoadDeviceParams();
-
-                    //相机配方参数重新加载
-                    foreach (var cam in CameraList)
+                    if (!Config.Debug.DebugEnable)
                     {
-                        if (!Config.ImageSave.UserLocalHistoryPath)
-                        {
-                            cam.Value.LocalPathBase = DeviceParamsExt.ImageCachePath;
-                            cam.Value.HistoryPathBase = DeviceParams.HistoryImageStoragePath;
-                        }
                         LoggerHelper.Info($"配置更新,检测状态{isInspet},准备重启相机,写入参数！");
-                        if (!isInspet)
-                        {   //点击配置更新，会重新加载相机
-                            cam.Value.Reload(_Recipe);
-                        }
-                        else
+                        //相机配方参数重新加载
+                        foreach (var cam in CameraList)
                         {
-                            cam.Value.UpdateParams(_Recipe);
+                            if (!Config.ImageSave.UserLocalHistoryPath)
+                            {
+                                //cam.Value.LocalPathBase = DeviceParamsExt.ImageCachePath;
+                                cam.Value.HistoryPathBase = DeviceParams.HistoryImageStoragePath;
+                            }
+                            if (!isInspet)
+                            {   //点击配置更新，会重新加载相机
+                                cam.Value.Reload(_Recipe);
+                                LoggerHelper.Info($"配置更新，检测状态{isInspet}，相机{cam.Value.CameraId}重新加载完成！");
+                            }
+                            else
+                            {
+                                cam.Value.UpdateParams(_Recipe);
+                            }
                         }
                     }
-
                     MessageClient.Instance.SendUpdateCompleteToServer(0);
 
                 }
@@ -262,7 +272,7 @@ namespace Inspect
             });
         }
         /// <summary>
-        /// 配置更新
+        /// 切换Recipe
         /// </summary>
         /// <param name="recipe"></param>
         private void OnRecipeSwitch(int recipe)
@@ -277,20 +287,20 @@ namespace Inspect
                 {
                     LoggerHelper.Info("通知Recipe=" + recipe);
                     if (recipe <= 0) throw new Exception("请求Recipe值异常，recipe=" + recipe);
-                    if (recipe != _Recipe)
+                    if (recipe != _Recipe && !Config.Debug.DebugEnable)
                     {
 
                         foreach (var cam in CameraList)
                         {
                             if (!Config.ImageSave.UserLocalHistoryPath)
                             {
-                                cam.Value.LocalPathBase = DeviceParamsExt.ImageCachePath;
+                                //cam.Value.LocalPathBase = DeviceParamsExt.ImageCachePath;
                                 cam.Value.HistoryPathBase = DeviceParams.HistoryImageStoragePath;
                             }
 
                             cam.Value.Reload(recipe);
+                            LoggerHelper.Info($"Recipe切换,重启相机{cam.Value.CameraId}完成！");
                         }
-
                         _Recipe = recipe;
                     }
                     LoggerHelper.Info("切换Recipe处理成功，recipe=" + recipe);
@@ -337,11 +347,11 @@ namespace Inspect
                 LoggerHelper.Info(string.Format("sn={0} panelId={1} recipe={2} path={3}", sn, panelId, recipe, path));
 
                 //创建本地图存储目录
-                //string pathname = DeviceParams.OriginImageStoragePath + "/" + path;
-                //pathname = pathname.Replace("//", "/");
-                //if (!Config.ImageSave.UserLocalHistoryPath)
-                //    if (!Directory.Exists(pathname))
-                //        Directory.CreateDirectory(pathname);
+                string pathname = DeviceParams.HistoryImageStoragePath + "/" + path;
+                pathname = pathname.Replace("//", "/");
+                if (!Config.ImageSave.UserLocalHistoryPath)
+                    if (!Directory.Exists(pathname))
+                        Directory.CreateDirectory(pathname);
 
                 //检测端显示信息
                 SetInspectInfo(sn, panelId, recipe, path);

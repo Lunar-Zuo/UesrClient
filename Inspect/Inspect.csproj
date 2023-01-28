@@ -61,9 +61,10 @@
       <HintPath>..\packages\CwCommon.1.1.2\lib\net46\CwCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="DALSA.SaperaLT.SapClassBasic, Version=8.60.0.2120, Culture=neutral, PublicKeyToken=4d8604101dcb6b58, processorArchitecture=AMD64">
+    <Reference Include="DALSA.SaperaLT.SapClassBasic, Version=8.65.0.2170, Culture=neutral, PublicKeyToken=4d8604101dcb6b58, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Teledyne DALSA\Sapera\Components\NET\Bin\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="log4net, Version=2.0.14.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.14\lib\net45\log4net.dll</HintPath>
@@ -138,6 +139,7 @@
     <Compile Include="Entities\ConfigAlgorithmEntity.cs" />
     <Compile Include="Entities\ConfigAlgoServEntity.cs" />
     <Compile Include="Entities\ConfigCameraEntity.cs" />
+    <Compile Include="Entities\ConfigDebug.cs" />
     <Compile Include="Entities\ConfigEntity.cs" />
     <Compile Include="Entities\ConfigImageSave.cs" />
     <Compile Include="Entities\DefectDataEntity.cs" />

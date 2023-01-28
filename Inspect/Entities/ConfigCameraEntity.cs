@@ -10,7 +10,9 @@ namespace Inspect.Entities
 {
     public class ConfigCameraEntity
     {
-        [XmlElement("id")]
+        [XmlAttribute("id")]
         public int CameraId_local { get; set; }
+        [XmlAttribute("device")]
+        public int CameraDevice { get; set; }
     }
 }

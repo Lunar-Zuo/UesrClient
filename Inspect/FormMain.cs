@@ -54,7 +54,10 @@ namespace Inspect
 
             Config = LoadConfig();
 
-            InitAlgoServsView();
+            if (Config.Algorithm.Enable) 
+            {
+                InitAlgoServsView();
+            }
 
             //异步启动
             StartUpAsync();
@@ -75,8 +78,6 @@ namespace Inspect
                 MessageClient.Instance.UnInit();
             }
             catch (Exception) { }
-
-            //KillAllAlgoServ();
         }
 
 

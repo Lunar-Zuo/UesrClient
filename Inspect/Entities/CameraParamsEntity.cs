@@ -14,8 +14,8 @@ namespace Inspect.Entities
         [JsonProperty("name")]
         public int CameraName { get; set; }
 
-        [JsonProperty("slice")]
-        public int SliceId { get; set; }
+        [JsonProperty("edgeId")]
+        public int EdgeId { get; set; }
 
     }
 }

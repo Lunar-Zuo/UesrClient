@@ -27,23 +27,33 @@ namespace Inspect.Entities
         /// </summary>
         [XmlElement(ElementName = "wsUrl")]
         public string WsServerUrl { get; set; }
-
+        /// <summary>
+        /// 相机相关设置
+        /// </summary>
         [XmlArray("cameras")]
         [XmlArrayItem("camera")]
         public List<ConfigCameraEntity> Cameras { get; set; }
-
+        /// <summary>
+        /// 算法相关
+        /// </summary>
         [XmlElement(ElementName = "algorithm")]
         public ConfigAlgorithmEntity Algorithm { get; set; }
-
+        /// <summary>
+        /// 心跳周期
+        /// </summary>
         [XmlElement(ElementName = "hbDuration")]
         public int HbDuration { get; set; }
-
+        /// <summary>
+        /// 存图设置
+        /// </summary>
         [XmlElement(ElementName = "image")]
         public ConfigImageSave ImageSave { get; set; }
+        /// <summary>
+        /// 单设备调试开关
+        /// </summary>
+        [XmlElement(ElementName = "debug")]
+        public ConfigDebug Debug { get; set; }
 
-        [XmlElement(ElementName = "recipeFilePath")]
-        public string RecipeFilePath { get; set; }
-        [XmlElement(ElementName = "recipeFileName")]
-        public string RecipeFileName { get; set; }
+
     }
 }

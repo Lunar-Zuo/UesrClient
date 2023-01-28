@@ -37,14 +37,14 @@
             this.labelRecipeInsp = new System.Windows.Forms.Label();
             this.labelPath = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.algoServViews1 = new Inspect.Views.AlgoServView();
-            this.algoServViews2 = new Inspect.Views.AlgoServView();
-            this.algoServViews3 = new Inspect.Views.AlgoServView();
-            this.algoServViews4 = new Inspect.Views.AlgoServView();
-            this.algoServViews5 = new Inspect.Views.AlgoServView();
-            this.algoServViews6 = new Inspect.Views.AlgoServView();
-            this.algoServViews7 = new Inspect.Views.AlgoServView();
-            this.algoServViews8 = new Inspect.Views.AlgoServView();
+            //this.algoServViews1 = new Inspect.Views.AlgoServView();
+            //this.algoServViews2 = new Inspect.Views.AlgoServView();
+            //this.algoServViews3 = new Inspect.Views.AlgoServView();
+            //this.algoServViews4 = new Inspect.Views.AlgoServView();
+            //this.algoServViews5 = new Inspect.Views.AlgoServView();
+            //this.algoServViews6 = new Inspect.Views.AlgoServView();
+            //this.algoServViews7 = new Inspect.Views.AlgoServView();
+            //this.algoServViews8 = new Inspect.Views.AlgoServView();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.SuspendLayout();
@@ -160,14 +160,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel2.ColumnCount = 1;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews1, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews2, 0, 1);
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews3, 0, 2);
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews4, 0, 3);
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews5, 0, 4);
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews6, 0, 5);
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews7, 0, 6);
-            this.tableLayoutPanel2.Controls.Add(this.algoServViews8, 0, 7);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews1, 0, 0);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews2, 0, 1);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews3, 0, 2);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews4, 0, 3);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews5, 0, 4);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews6, 0, 5);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews7, 0, 6);
+            //this.tableLayoutPanel2.Controls.Add(this.algoServViews8, 0, 7);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(12, 98);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 8;
@@ -181,94 +181,94 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 12.5F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(526, 343);
             this.tableLayoutPanel2.TabIndex = 1;
-            // 
-            // algoServViews1
-            // 
-            this.algoServViews1._Name = "label1";
-            this.algoServViews1._Port = "label1";
-            this.algoServViews1._Status = false;
-            this.algoServViews1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews1.Location = new System.Drawing.Point(3, 3);
-            this.algoServViews1.Name = "algoServViews1";
-            this.algoServViews1.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews1.TabIndex = 0;
-            // 
-            // algoServViews2
-            // 
-            this.algoServViews2._Name = "label1";
-            this.algoServViews2._Port = "label1";
-            this.algoServViews2._Status = false;
-            this.algoServViews2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews2.Location = new System.Drawing.Point(3, 45);
-            this.algoServViews2.Name = "algoServViews2";
-            this.algoServViews2.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews2.TabIndex = 0;
-            // 
-            // algoServViews3
-            // 
-            this.algoServViews3._Name = "label1";
-            this.algoServViews3._Port = "label1";
-            this.algoServViews3._Status = false;
-            this.algoServViews3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews3.Location = new System.Drawing.Point(3, 87);
-            this.algoServViews3.Name = "algoServViews3";
-            this.algoServViews3.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews3.TabIndex = 0;
-            // 
-            // algoServViews4
-            // 
-            this.algoServViews4._Name = "label1";
-            this.algoServViews4._Port = "label1";
-            this.algoServViews4._Status = false;
-            this.algoServViews4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews4.Location = new System.Drawing.Point(3, 129);
-            this.algoServViews4.Name = "algoServViews4";
-            this.algoServViews4.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews4.TabIndex = 0;
-            // 
-            // algoServViews5
-            // 
-            this.algoServViews5._Name = "label1";
-            this.algoServViews5._Port = "label1";
-            this.algoServViews5._Status = false;
-            this.algoServViews5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews5.Location = new System.Drawing.Point(3, 171);
-            this.algoServViews5.Name = "algoServViews5";
-            this.algoServViews5.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews5.TabIndex = 0;
-            // 
-            // algoServViews6
-            // 
-            this.algoServViews6._Name = "label1";
-            this.algoServViews6._Port = "label1";
-            this.algoServViews6._Status = false;
-            this.algoServViews6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews6.Location = new System.Drawing.Point(3, 213);
-            this.algoServViews6.Name = "algoServViews6";
-            this.algoServViews6.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews6.TabIndex = 0;
-            // 
-            // algoServViews7
-            // 
-            this.algoServViews7._Name = "label1";
-            this.algoServViews7._Port = "label1";
-            this.algoServViews7._Status = false;
-            this.algoServViews7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews7.Location = new System.Drawing.Point(3, 255);
-            this.algoServViews7.Name = "algoServViews7";
-            this.algoServViews7.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews7.TabIndex = 0;
-            // 
-            // algoServViews8
-            // 
-            this.algoServViews8._Name = "label1";
-            this.algoServViews8._Port = "label1";
-            this.algoServViews8._Status = false;
-            this.algoServViews8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
-            this.algoServViews8.Location = new System.Drawing.Point(3, 300);
-            this.algoServViews8.Name = "algoServViews8";
-            this.algoServViews8.Size = new System.Drawing.Size(520, 36);
-            this.algoServViews8.TabIndex = 0;
+            //// 
+            //// algoServViews1
+            //// 
+            //this.algoServViews1._Name = "label1";
+            //this.algoServViews1._Port = "label1";
+            //this.algoServViews1._Status = false;
+            //this.algoServViews1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews1.Location = new System.Drawing.Point(3, 3);
+            //this.algoServViews1.Name = "algoServViews1";
+            //this.algoServViews1.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews1.TabIndex = 0;
+            //// 
+            //// algoServViews2
+            //// 
+            //this.algoServViews2._Name = "label1";
+            //this.algoServViews2._Port = "label1";
+            //this.algoServViews2._Status = false;
+            //this.algoServViews2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews2.Location = new System.Drawing.Point(3, 45);
+            //this.algoServViews2.Name = "algoServViews2";
+            //this.algoServViews2.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews2.TabIndex = 0;
+            //// 
+            //// algoServViews3
+            //// 
+            //this.algoServViews3._Name = "label1";
+            //this.algoServViews3._Port = "label1";
+            //this.algoServViews3._Status = false;
+            //this.algoServViews3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews3.Location = new System.Drawing.Point(3, 87);
+            //this.algoServViews3.Name = "algoServViews3";
+            //this.algoServViews3.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews3.TabIndex = 0;
+            //// 
+            //// algoServViews4
+            //// 
+            //this.algoServViews4._Name = "label1";
+            //this.algoServViews4._Port = "label1";
+            //this.algoServViews4._Status = false;
+            //this.algoServViews4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews4.Location = new System.Drawing.Point(3, 129);
+            //this.algoServViews4.Name = "algoServViews4";
+            //this.algoServViews4.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews4.TabIndex = 0;
+            //// 
+            //// algoServViews5
+            //// 
+            //this.algoServViews5._Name = "label1";
+            //this.algoServViews5._Port = "label1";
+            //this.algoServViews5._Status = false;
+            //this.algoServViews5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews5.Location = new System.Drawing.Point(3, 171);
+            //this.algoServViews5.Name = "algoServViews5";
+            //this.algoServViews5.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews5.TabIndex = 0;
+            //// 
+            //// algoServViews6
+            //// 
+            //this.algoServViews6._Name = "label1";
+            //this.algoServViews6._Port = "label1";
+            //this.algoServViews6._Status = false;
+            //this.algoServViews6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews6.Location = new System.Drawing.Point(3, 213);
+            //this.algoServViews6.Name = "algoServViews6";
+            //this.algoServViews6.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews6.TabIndex = 0;
+            //// 
+            //// algoServViews7
+            //// 
+            //this.algoServViews7._Name = "label1";
+            //this.algoServViews7._Port = "label1";
+            //this.algoServViews7._Status = false;
+            //this.algoServViews7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews7.Location = new System.Drawing.Point(3, 255);
+            //this.algoServViews7.Name = "algoServViews7";
+            //this.algoServViews7.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews7.TabIndex = 0;
+            //// 
+            //// algoServViews8
+            //// 
+            //this.algoServViews8._Name = "label1";
+            //this.algoServViews8._Port = "label1";
+            //this.algoServViews8._Status = false;
+            //this.algoServViews8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            //this.algoServViews8.Location = new System.Drawing.Point(3, 300);
+            //this.algoServViews8.Name = "algoServViews8";
+            //this.algoServViews8.Size = new System.Drawing.Size(520, 36);
+            //this.algoServViews8.TabIndex = 0;
             // 
             // FormMain
             // 

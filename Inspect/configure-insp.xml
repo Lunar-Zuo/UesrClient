@@ -1,19 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <configure>
   <!--进程id-->
-  <programId>2</programId>
+  <programId>11</programId>
   
   <!--后台数据提交地址-->
-  <commitUrl>http://192.168.2.100:8099/wgtech/api</commitUrl>
+  <commitUrl>http://127.0.0.1:8084/gds4/api</commitUrl>
   
   <!--Web Socket服务器地址-->
-  <wsUrl>ws://192.168.2.100:9600/</wsUrl>
+  <wsUrl>ws://127.0.0.1:9600/</wsUrl>
 
   <!--检测相机配置-->
   <cameras>
-    <camera id="1" />
-    <camera id="2" />
-    <camera id="3" />
+	<!--<每次工控机断电需要打开相机大师软件确认 device 这个值所指的是下面备注的相机>-->
+    <camera id="7" device="1"/>
+	  <!--短1-45-->
+    <camera id="8" device="4"/>
+	  <!--短1-90-->
+    <camera id="9" device="3"/>
+	  <!--短2-90-->
+    <camera id="10" device="2"/>
+	  <!--短2-45-->
   </cameras>
 
   <!--心跳包发送周期, ms-->
@@ -22,7 +28,7 @@
   <!--算法配置-->
   <algorithm>
     <!--请求地址-->
-    <url>http://192.168.2.105:9800/</url>
+    <url>http://192.168.2.105:/</url>
     <!--Recipe参数目录-->
     <recipeFilePath>C:/BJCW/AlgoConfig/</recipeFilePath>
     <!--recipe参数文件-->
@@ -32,13 +38,10 @@
     <servs>
       <item id="1" name="算法1" port="12000" />
       <!--<item id="2" name="算法2" port="12010" />-->
-	    <!--<item id="3" name="算法3" port="12020" />-->
     </servs>
   </algorithm>
 
   <image>
-    <!--缓存图存储根目录-->
-    <imageCachePath>F:/Images/</imageCachePath>
     <!--历史数据存储根目录-->
     <historyPath>E:/Images/</historyPath>
     <!--历史数据存储目录是否使用配置文件-->
@@ -46,12 +49,10 @@
 
   </image>
 
-  <!--单机调试-->
+  <!--单机调试,屏蔽相机和算法-->
   <debug>
     <!--启用-->
     <enable>false</enable>
-    <!--未配置NAS，单机存储图片位置-->
-    <path>E:/Images/</path>
   </debug>
   
 </configure>

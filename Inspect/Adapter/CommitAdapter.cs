@@ -41,13 +41,13 @@ namespace Inspect.Adapter
             await HttpHelper.PostJsonAsync(url, JsonConvert.SerializeObject(body));
         }
         /// <summary>
-        /// 3.1.3相机位置字典表获取
+        /// 4.2.2检测相机参数获取
         /// </summary>
         /// <param name="cameraId"></param>
         /// <returns></returns>
         public List<CameraParamsEntity> GetCameraParams()
         {
-            string url = BaseUrl + "/setup/camera_pos_dict";
+            string url = BaseUrl + "/setup/camera_params";
             Dictionary<string, object> body = new Dictionary<string, object>();
             var res = GetData(url, JsonConvert.SerializeObject(body));
             return JsonConvert.DeserializeObject<List<CameraParamsEntity>>(res.ToString());

@@ -9,6 +9,14 @@ namespace Inspect.Entities
 {
     public class CameraRecipeParamsEntity
     {
+        /// <summary>
+        /// 相机编号
+        /// </summary>
+        [JsonProperty("cameraId")]
+        public string CameraId { get; set; }
+        /// <summary>
+        /// 相机配置文件
+        /// </summary>
         [JsonProperty("filename")]
         public string FileName { get; set; }
         /// <summary>
@@ -31,6 +39,12 @@ namespace Inspect.Entities
         /// </summary>
         [JsonProperty("usable")]
         public int Usable { get; set; }
+        /// <summary>
+        /// 边编号
+        /// </summary>
+        [JsonProperty("edgeId")]
+        public int EdgeId { get; set; }
+        
 
     }
 }
