@@ -16,12 +16,12 @@ namespace Inspect.Entities
         /// 水平缩放参数
         /// </summary>
         [JsonProperty("scaleFactorVer")]
-        public string ScaleFactorVer { get; set; }
+        public double ScaleFactorVer { get; set; }
         /// <summary>
         /// 垂直缩放参数
         /// </summary>
         [JsonProperty("scaleFactorHor")]
-        public string ScaleFactorHor { get; set; }
+        public double ScaleFactorHor { get; set; }
         /// <summary>
         /// 缓存图片存储目录
         /// </summary>
@@ -31,7 +31,7 @@ namespace Inspect.Entities
         /// 像素->距离 转换因子
         /// </summary>
         [JsonProperty("pixelDistaFactor")]
-        public string PixelDistaFactor { get; set; }
+        public double PixelDistaFactor { get; set; }
 
     }
 }

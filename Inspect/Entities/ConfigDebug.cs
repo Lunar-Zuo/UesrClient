@@ -9,6 +9,9 @@ namespace Inspect.Entities
 {
     public class ConfigDebug
     {
+        /// <summary>
+        /// 单机调试开关
+        /// </summary>
         [XmlElement(ElementName = "enable")]
         public bool DebugEnable { get; set; }
 

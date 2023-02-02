@@ -54,10 +54,7 @@ namespace Inspect
 
             Config = LoadConfig();
 
-            if (Config.Algorithm.Enable) 
-            {
-                InitAlgoServsView();
-            }
+            InitAlgoServsView();
 
             //异步启动
             StartUpAsync();

@@ -103,21 +103,7 @@ namespace Inspect.Adapter
             var res = GetData(url, "");
             return JsonConvert.DeserializeObject<DeviceParamEntity>(res.ToString());
         }
-        /// <summary>
-        /// 4.3.9图像预处理参数获取
-        /// </summary>
-        /// <param name="recipe"></param>
-        /// <param name="mmg"></param>
-        /// <returns></returns>
-        public ImagePreProcessParamsEntity GetImagePreProcessParams(int recipe, int mmg = 0)
-        {
-            string url = BaseUrl + "/setup/image_pre_process_params";
-            Dictionary<string, object> body = new Dictionary<string, object>();
-            body.Add("recipePlc", recipe);
-            body.Add("mmg", mmg);
-            var res = GetData(url, JsonConvert.SerializeObject(body));
-            return JsonConvert.DeserializeObject<ImagePreProcessParamsEntity>(res.ToString());
-        }
+
 
         private object GetData(string url, string body)
         {

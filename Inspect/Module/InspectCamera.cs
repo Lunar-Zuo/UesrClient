@@ -27,7 +27,7 @@ namespace Inspect.Module
         private DalsaCameraAdapter device = null;
         private CameraParamsEntity cameraParam = null;
         private CameraRecipeParamsEntity cameraRecipeParam = null;
-        private ImagePreProcessParamsEntity preProcessParams = null;
+        private DeviceParamExtEntity deviceParamExt = null;
 
         //针对当前相机是否完成处理
         private Dictionary<string, CountUtils> PanelProcess = new Dictionary<string, CountUtils>();
@@ -39,9 +39,16 @@ namespace Inspect.Module
         public bool IsInspecting { get; set; }
         public string SliceName { get; set; }
         public int CameraId { get; set; }
+        /// <summary>
+        /// 历史数据存储目录是否使用配置文件
+        /// </summary>
         public bool HistoryUserLocal = false;
+        /// <summary>
+        /// 算法启用开关
+        /// </summary>
+        public bool AlgorithmEnable = false;
         public string HistoryPathBase = @"E:\Images";
-        public string LocalPathBase = @"E:\LocalImage";
+        //public string LocalPathBase = @"E:\LocalImage";
         public string AlgorithmRecipeFileName = @"C:\BJCW\AlgoConfig\recipe.ini";
 
         //数据更新，配方切换，相机初始化流程保护
@@ -68,11 +75,11 @@ namespace Inspect.Module
 
             LoadParams(recipe);
 
-            /* 相机7->   短1-45
+            /* 本地配置文件中做UI的cameraId与相机大师中相机序号的映射
+             * 相机7->   短1-45
              * 相机8->   短1-90
              * 相机9->   短2-45
-             * 相机10->  短1-90
-             */
+             * 相机10->  短1-90 */
             int CameraDevice = GetCameraDevice(CameraId);
             device = new DalsaCameraAdapter();
             device.CameraConnectionStatusHandler += OnCameraConnectionStatus;
@@ -140,6 +147,7 @@ namespace Inspect.Module
         /// <param name="recipe"></param>
         public void LoadParams(int recipe)
         {
+            LoadDeviceParamSExt();
             LoadCameraRecipeParams(recipe);
             //LoadRecipeAlgorithmParams(recipe);
             //暂时不用
@@ -183,9 +191,13 @@ namespace Inspect.Module
                 LoggerHelper.Warn("算法传统参数传入失败，" + ex.Message);
             }
         }
-        private void LoadImagePreProcessParams(int recipe)
+        /// <summary>
+        /// 高级参数获取
+        /// </summary>
+        /// <param name="recipe"></param>
+        private void LoadDeviceParamSExt()
         {
-            preProcessParams = CommitAdapter.Instance.GetImagePreProcessParams(recipe);
+            deviceParamExt = CommitAdapter.Instance.GetDeviceParamExt();
         }
         private void LoadAlgoParams()
         {
@@ -195,7 +207,6 @@ namespace Inspect.Module
 
         public void InspectStart(string SN, string panelId, int recipe, string path)
         {
-
             _ImageId = 0;
             _SerialNumber = SN;
             _Recipe = recipe;
@@ -295,10 +306,9 @@ namespace Inspect.Module
                 {
                     //1.处理info信息
                     string filename = CreateFileName(info.PanelId, cameraRecipeParam.EdgeId, info.ImageId);
-                    //NAS上存的原图
-                    info.HistoryFileName = HistoryPathBase + "/" + info.RelativePath + "/";
+                    //存图路径
+                    info.HistoryFilePath = HistoryPathBase + "/" + info.RelativePath + "/";
                     info.HistoryFileName = filename + ".jpg";
-
                     LoggerHelper.Info("收到照片 " + filename);
 
                     //2.OpenCV载入数据
@@ -396,8 +406,8 @@ namespace Inspect.Module
                 {
                     #region 存缩略图  传给算法
                     Mat dst = new Mat();
-                    Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / preProcessParams.HistoryImageScaleX), Height = (int)(src.Height / preProcessParams.HistoryImageScaleY) });
-                    int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
+                    Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / deviceParamExt.ScaleFactorVer), Height = (int)(src.Height / deviceParamExt.ScaleFactorHor) });
+                    int[] param = new int[2] { 1, deviceParamExt.PixelDistaFactor };
                     string pathname = info.HistoryFilePath + info.HistoryFileName;
                     Cv2.ImWrite(pathname, dst, param);
                     #endregion
@@ -405,26 +415,21 @@ namespace Inspect.Module
                     string arr = pathname.Replace("//", "/");
                     string arrpathname = arr.Replace("/", "\\");
                     Thread.Sleep(100);
-                    LoggerHelper.Debug($"缓存图存图完成，路径：{arrpathname}，检测程序调用算法开始!");
-                    ConfigEntity configEntity = LoadConfig();
-                    //2.调用算法（调试时使用）
-                    //return AlgorithmAdapter.Instance.TradInspectRequest(arrpathname, info.HistoryFilePath, AlgorithmRecipeFileName, info.PanelId, cameraParam.SliceId, CameraId, info.ImageId);
-                    if (configEntity.Algorithm.Enable)//本地配置文件算法开关
-                    {
+                    LoggerHelper.Debug($"存图完成，路径：{arrpathname}，检测程序调用算法开始! 启用算法开关{AlgorithmEnable}");
 
+                    if (AlgorithmEnable/*configEntity.Algorithm.Enable*/)//本地配置文件算法开关
+                    {
                         //2.调用算法
-                        ResponseEntity res = await AlgorithmAdapter.Instance.InspectRequest(arrpathname,
-                            info.HistoryFilePath,
-                            AlgorithmRecipeFileName,
+                        ResponseEntity res = await AlgorithmAdapter.Instance.InspectRequest(
                             info.PanelId,
-                            /*cameraParam.SliceId*/
                             info.Recipe,
+                            arrpathname,
+                            info.HistoryFilePath,
                             CameraId,
                             info.ImageId);
 
-                        //删除缓存图
+                        //删除图
                         //ToolAdapter.Instance.CleanFile(arrpathname, 0);
-
                         if (res.Code != 0)
                         {
                             //返回异常
@@ -435,56 +440,15 @@ namespace Inspect.Module
                     }
                     else
                     {
-                        LoggerHelper.Info(string.Format("启用算法开关为{0} Panel={1} Slice={2} Cam={3} imageId={4} ", configEntity.Algorithm.Enable, info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId));
-                        return null;
+                        LoggerHelper.Info(string.Format("不启用算法，开关为{0} Panel={1} Slice={2} Cam={3} imageId={4} ", AlgorithmEnable, info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId));
+                        //不启用算法，调用模拟的算法文件
+                        return AlgorithmAdapter.Instance.TradInspectRequest(arrpathname, info.HistoryFilePath, AlgorithmRecipeFileName, info.PanelId, cameraParam.EdgeId, CameraId, info.ImageId); ;
                     }
                 }
                 catch (Exception ex)
                 {
                     LoggerHelper.Warn(string.Format("Panel={0} Slice={1} Cam={2} imageId={3} {4}", info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId, ex.Message));
                     return null;
-                }
-            });
-        }
-
-
-        /// <summary>
-        /// 历史图（原图）存储
-        /// </summary>
-        /// <param name="src"></param>
-        /// <param name="info"></param>
-        /// <returns></returns>
-        private async Task<string> HistoryImageSave(Mat src, InspectImageInfoEntity info)
-        {
-            return await Task<string>.Run(() =>
-            {
-                try
-                {
-                    #region 存图到NAS,原图
-                    Mat dst = new Mat();
-                    //存储到本地磁盘
-                    string pathname = info.HistoryFilePath + info.HistoryFileName;
-                    //Cv2.ImWrite(pathname, src);
-                    Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / 1), Height = (int)(src.Height / 1) });
-                    int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
-                    dst.SaveImage(pathname, param);
-                    #endregion
-
-                    //Mat dst = new Mat();
-                    //Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / preProcessParams.HistoryImageScaleX), Height = (int)(src.Height / preProcessParams.HistoryImageScaleY) });
-                    //int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
-                    //string pathname = info.HistoryFilePath + info.HistoryFileName;
-                    //Cv2.ImWrite(pathname, dst, param);
-
-                    LoggerHelper.Info("NAS原图存图" + pathname);
-
-                    return info.HistoryFileName;
-                }
-                catch (Exception ex)
-                {
-                    LoggerHelper.Warn(string.Format("存储{0} {1} {2} image{3}异常, {4}",
-                        info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId, ex.Message));
-                    return "";
                 }
             });
         }
@@ -568,5 +532,48 @@ namespace Inspect.Module
                 LoggerHelper.Info("检测超时，删除数据，PanelProcessRemove(key)： " + key);
             }
         }
+
+        #region 暂时未使用
+        /// <summary>
+        /// 历史图（原图）存储
+        /// </summary>
+        /// <param name="src"></param>
+        /// <param name="info"></param>
+        /// <returns></returns>
+        //private async Task<string> HistoryImageSave(Mat src, InspectImageInfoEntity info)
+        //{
+        //    return await Task<string>.Run(() =>
+        //    {
+        //        try
+        //        {
+        //            #region 存图到NAS,原图
+        //            Mat dst = new Mat();
+        //            //存储到本地磁盘
+        //            string pathname = info.HistoryFilePath + info.HistoryFileName;
+        //            //Cv2.ImWrite(pathname, src);
+        //            Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / 1), Height = (int)(src.Height / 1) });
+        //            int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
+        //            dst.SaveImage(pathname, param);
+        //            #endregion
+
+        //            //Mat dst = new Mat();
+        //            //Cv2.Resize(src, dst, new Size() { Width = (int)(src.Width / preProcessParams.HistoryImageScaleX), Height = (int)(src.Height / preProcessParams.HistoryImageScaleY) });
+        //            //int[] param = new int[2] { 1, preProcessParams.JpegQuanlity };
+        //            //string pathname = info.HistoryFilePath + info.HistoryFileName;
+        //            //Cv2.ImWrite(pathname, dst, param);
+
+        //            LoggerHelper.Info("NAS原图存图" + pathname);
+
+        //            return info.HistoryFileName;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            LoggerHelper.Warn(string.Format("存储{0} {1} {2} image{3}异常, {4}",
+        //                info.PanelId, cameraRecipeParam.EdgeId, CameraId, info.ImageId, ex.Message));
+        //            return "";
+        //        }
+        //    });
+        //}
+        #endregion
     }
 }

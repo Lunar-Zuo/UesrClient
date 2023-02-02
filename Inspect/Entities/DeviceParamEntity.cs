@@ -14,12 +14,12 @@ namespace Inspect.Entities
     {
 
         /// <summary>
-        /// NAS原图存储地址
+        /// 原图存储地址
         /// </summary>
         [JsonProperty("historyImageStoragePath")]
         public string HistoryImageStoragePath { get; set; }
         /// <summary>
-        /// NAS原图存储天数
+        /// 原图存储天数
         /// </summary>
         [JsonProperty("historyImageStorageDays")]
         public int HistoryImageStorageDays { get; set; }

@@ -25,79 +25,83 @@ namespace Inspect.Adapter
         private SapLocation loc = null;
         private SapAcqDevice AcqDevice = null;
         private SapBuffer Buffers = null;
-
+        //采集卡连接方式
         private SapAcquisition Acq = null;
         private SapFeature Feature = null;
         private SapTransfer Xfer = null;
         private SapLocation loc2 = null;
-
+        //网口连接方式
         private SapAcqDeviceToBuf m_Xfer = null;
         Dictionary<int, string> ServerNames = new Dictionary<int, string>();
         Dictionary<int, string> DeviceNames = new Dictionary<int, string>();
         public string ConfigFileName { get; set; }//相机配置文件路径
-        public const string ServerName = "Xtium-CL_MX4_1";//相机硬件配置参数，显卡的名称
+
+        #region 采集卡连接相机
+        //public const string ServerName = "Xtium-CL_MX4_1";//相机硬件配置参数，显卡的名称
         /// <summary>
         /// 采集卡连接相机
         /// </summary>
         /// <exception cref="Exception"></exception>
-        public void OpenDevice()
-        {
-            //TODO:???这个值是否会改变
-            int ResourceIndex = 0;//相机硬配置参数，选择模式
+        //public void OpenDevice()
+        //{
+        //    //TODO:???这个值是否会改变
+        //    int ResourceIndex = 0;//相机硬配置参数，选择模式
 
-            loc = new SapLocation(ServerName, ResourceIndex);//第一位是显卡的名称；第二位是选择模式的第几项
+        //    loc = new SapLocation(ServerName, ResourceIndex);//第一位是显卡的名称；第二位是选择模式的第几项
 
-            if (SapManager.GetResourceCount(ServerName, SapManager.ResourceType.Acq) > 0)
-            {
-                Acq = new SapAcquisition(loc, ConfigFileName);
-                Buffers = new SapBuffer(2, Acq, SapBuffer.MemoryType.ScatterGather);
-                Xfer = new SapAcqToBuf(Acq, Buffers);
+        //    if (SapManager.GetResourceCount(ServerName, SapManager.ResourceType.Acq) > 0)
+        //    {
+        //        Acq = new SapAcquisition(loc, ConfigFileName);
+        //        Buffers = new SapBuffer(2, Acq, SapBuffer.MemoryType.ScatterGather);
+        //        Xfer = new SapAcqToBuf(Acq, Buffers);
 
-                // Create acquisition object
-                if (!Acq.Create())
-                {
-                    throw new Exception("SapAcquisition Create Failed");
-                }
-            }
-            else
-            {
-                //TODO：给主程序发消息，主程序弹窗显示
-                LoggerHelper.Warn($"相机{ConfigFileName}丢失！");
-            }
+        //        // Create acquisition object
+        //        if (!Acq.Create())
+        //        {
+        //            throw new Exception("SapAcquisition Create Failed");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        //TODO：给主程序发消息，主程序弹窗显示
+        //        LoggerHelper.Warn($"相机{ConfigFileName}丢失！");
+        //    }
 
-            loc2 = new SapLocation("CameraLink_1", 0);//相机硬件配置参数
-            AcqDevice = new SapAcqDevice(loc2, false);
-            Feature = new SapFeature(loc2);
-            Feature.Create();
+        //    loc2 = new SapLocation("CameraLink_1", 0);//相机硬件配置参数
+        //    AcqDevice = new SapAcqDevice(loc2, false);
+        //    Feature = new SapFeature(loc2);
+        //    Feature.Create();
 
-            // Create acquisition object
-            if (!AcqDevice.Create())
-            {
-                DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
-                throw new Exception("SapAcqDevice Create Failed");
-            }
+        //    // Create acquisition object
+        //    if (!AcqDevice.Create())
+        //    {
+        //        DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
+        //        throw new Exception("SapAcqDevice Create Failed");
+        //    }
 
-            // End of frame event
-            Xfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
-            Xfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
-            Xfer.XferNotifyContext = this;
+        //    // End of frame event
+        //    Xfer.Pairs[0].EventType = SapXferPair.XferEventType.EndOfFrame;
+        //    Xfer.XferNotify += new SapXferNotifyHandler(xfer_XferNotify);
+        //    Xfer.XferNotifyContext = this;
 
-            // Create buffer object
-            if (!Buffers.Create())
-            {
-                DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
-                throw new Exception("Error during SapBuffer creation");
-            }
+        //    // Create buffer object
+        //    if (!Buffers.Create())
+        //    {
+        //        DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
+        //        throw new Exception("Error during SapBuffer creation");
+        //    }
 
-            // Create transfer object
-            if (!Xfer.Create())
-            {
-                DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
-                throw new Exception("Error during SapTransfer creation!");
-            }
+        //    // Create transfer object
+        //    if (!Xfer.Create())
+        //    {
+        //        DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
+        //        throw new Exception("Error during SapTransfer creation!");
+        //    }
 
-            CameraConnectionStatus(true);
-        }
+        //    CameraConnectionStatus(true);
+        //}
+        #endregion
+
         /// <summary>
         /// 网口连接相机
         /// </summary>
@@ -129,25 +133,32 @@ namespace Inspect.Adapter
             // Create acquisition object
             if (!AcqDevice.Create())
             {
-                DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
+                DestroysObjects(Acq, Feature, AcqDevice, Buffers, m_Xfer);
                 throw new Exception("SapAcqDevice Create Failed");
             }
 
             // Create buffer object
             if (!Buffers.Create())
             {
-                DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
+                DestroysObjects(Acq, Feature, AcqDevice, Buffers, m_Xfer);
                 throw new Exception("Error during SapBuffer creation");
             }
 
             // Create transfer object
             if (!m_Xfer.Create())
             {
-                DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
+                DestroysObjects(Acq, Feature, AcqDevice, Buffers, m_Xfer);
                 throw new Exception("Error during SapTransfer creation!");
             }
             CameraConnectionStatus(true);
         }
+        /// <summary>
+        /// 获取相机连接信息
+        /// </summary>
+        /// <param name="serverIndex">相机排序号1-X</param>
+        /// <param name="sCameraName">相机型号（相机大师中Device）</param>
+        /// <param name="nDeviceUserID">相机名称（相机大师中Device User ID）</param>
+        /// <returns></returns>
         public bool GetNameInfo(int serverIndex, out string sCameraName, out string nDeviceUserID)
         {
             sCameraName = "";
@@ -215,18 +226,17 @@ namespace Inspect.Adapter
         {
             if (IsCapturing) StopCapture();
 
-            DestroysObjects(Acq, Feature, AcqDevice, Buffers, Xfer);
+            DestroysObjects(Acq, Feature, AcqDevice, Buffers, m_Xfer);
             loc.Dispose();
             //loc2.Dispose();
-
             CameraConnectionStatus(false);
         }
 
         public void StartCapture()
         {
-            if (Xfer != null)
+            if (m_Xfer != null)
             {
-                Xfer.Grab();
+                m_Xfer.Grab();
                 CameraCapturingStatus(true);
             }
         }
@@ -235,9 +245,9 @@ namespace Inspect.Adapter
         {
             try
             {
-                if (Xfer != null)
+                if (m_Xfer != null)
                 {
-                    Xfer.Freeze();
+                    m_Xfer.Freeze();
                     CameraCapturingStatus(false);
                 }
             }

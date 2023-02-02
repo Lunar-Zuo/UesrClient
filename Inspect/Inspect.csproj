@@ -63,7 +63,7 @@
     </Reference>
     <Reference Include="DALSA.SaperaLT.SapClassBasic, Version=8.65.0.2170, Culture=neutral, PublicKeyToken=4d8604101dcb6b58, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files\Teledyne DALSA\Sapera\Components\NET\Bin\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
+      <HintPath>..\packages\DALSA.SaperaLT.SapClassBasic.dll</HintPath>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="log4net, Version=2.0.14.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -147,7 +147,6 @@
     <Compile Include="Entities\DefectInspectResEntity.cs" />
     <Compile Include="Entities\DeviceParamEntity.cs" />
     <Compile Include="Entities\DeviceParamExtEntity.cs" />
-    <Compile Include="Entities\ImagePreProcessParamsEntity.cs" />
     <Compile Include="Entities\InspectEdgeEntity.cs" />
     <Compile Include="Entities\InspectImageInfoEntity.cs" />
     <Compile Include="Entities\InspectParamEntity.cs" />

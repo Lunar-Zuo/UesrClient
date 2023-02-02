@@ -45,6 +45,11 @@ namespace Inspect.Adapter
                 PointList.Add(port);
             }
         }
+        /// <summary>
+        /// recipe算法参数传入
+        /// </summary>
+        /// <param name="recipeId"></param>
+        /// <param name="data"></param>
         public async void InspectRecipeRequest(int recipeId, string data)
         {
             string port = "";
@@ -80,7 +85,7 @@ namespace Inspect.Adapter
         /// <param name="env_param">环境参数</param>
         /// <param name="insp_param">检测参数</param>
         /// <returns></returns>
-        public async Task<ResponseEntity> InspectRequest(string imageFile, string ngPath, string setupFile, string panelCode, int recipeId, int cameraId, int imageId)
+        public async Task<ResponseEntity> InspectRequest(string panelCode, int recipeId, string imageFile, string ngPath, int cameraId, int imageId)
         {
             string port = "";
             try
@@ -88,11 +93,10 @@ namespace Inspect.Adapter
                 port = GetPoint();
                 string url = GetBaseUrl(port) + "/api/algorithm/defect_inspect";
                 Dictionary<string, object> body = new Dictionary<string, object>();
-                body.Add("imageFileName", imageFile);
-                body.Add("ngPath", ngPath);
-                body.Add("setupFileName", setupFile);
                 body.Add("panelCode", panelCode);
                 body.Add("recipeId", recipeId);
+                body.Add("imageFileName", imageFile);
+                body.Add("ngPath", ngPath);
                 body.Add("cameraId", cameraId);
                 body.Add("imageId", imageId);
                 //LoggerHelper.Debug(url);
