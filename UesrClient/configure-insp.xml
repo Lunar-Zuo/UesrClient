@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<configure>
+  <!--进程id-->
+  <programId>11</programId>
+  
+  <!--Web Socket服务器地址-->
+  <wsUrl>ws://127.0.0.1:9600/</wsUrl>
+
+  <!--检测相机配置-->
+  <cameras>
+    <camera id="7" device="1"/>
+  </cameras>
+
+  <!--心跳包发送周期, ms-->
+  <hbDuration>3000</hbDuration>
+
+  
+</configure>
